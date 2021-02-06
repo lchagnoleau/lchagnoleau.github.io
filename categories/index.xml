@@ -5,12 +5,12 @@
     
     
     
-    <link>lchagnoleau.github.io/categories/</link>
+    <link>https://lchagnoleau.github.io/categories/</link>
     <description>Recent content in Categories on Loïc Chagnoleau</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>fr-FR</language>
     
-	<atom:link href="lchagnoleau.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://lchagnoleau.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
     
     
   </channel>

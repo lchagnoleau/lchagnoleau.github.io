@@ -5,21 +5,21 @@
     
     
     
-    <link>lchagnoleau.github.io/post/</link>
+    <link>https://lchagnoleau.github.io/post/</link>
     <description>Recent content in Posts on Loïc Chagnoleau</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>fr-FR</language>
     <lastBuildDate>Sun, 31 Jan 2021 12:15:00 +0100</lastBuildDate>
     
-	<atom:link href="lchagnoleau.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://lchagnoleau.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>FreeRTOS from scratch sur STM32F446 Partie 2/2</title>
-      <link>lchagnoleau.github.io/posts/freertos2/</link>
+      <link>https://lchagnoleau.github.io/posts/freertos2/</link>
       <pubDate>Sun, 31 Jan 2021 12:15:00 +0100</pubDate>
       
-      <guid>lchagnoleau.github.io/posts/freertos2/</guid>
+      <guid>https://lchagnoleau.github.io/posts/freertos2/</guid>
       <description>
         
           
@@ -37,10 +37,10 @@ Qu&amp;rsquo;est ce qu&amp;rsquo;un OS temps réel ? Dans les systèmes embarqu�
     
     <item>
       <title>FreeRTOS from scratch sur STM32F446 Partie 1/2</title>
-      <link>lchagnoleau.github.io/posts/freertos1/</link>
+      <link>https://lchagnoleau.github.io/posts/freertos1/</link>
       <pubDate>Sat, 23 Jan 2021 19:18:00 +0100</pubDate>
       
-      <guid>lchagnoleau.github.io/posts/freertos1/</guid>
+      <guid>https://lchagnoleau.github.io/posts/freertos1/</guid>
       <description>
         
           
@@ -58,10 +58,10 @@ Dans le premier article, on créera notre projet from scratch. Ce sera dans le s
     
     <item>
       <title>FreeRTOS : configASSERT( xTaskToNotify )</title>
-      <link>lchagnoleau.github.io/posts/configassert/</link>
+      <link>https://lchagnoleau.github.io/posts/configassert/</link>
       <pubDate>Sun, 17 Jan 2021 10:00:00 +0100</pubDate>
       
-      <guid>lchagnoleau.github.io/posts/configassert/</guid>
+      <guid>https://lchagnoleau.github.io/posts/configassert/</guid>
       <description>
         
           
@@ -80,13 +80,13 @@ Cette assert est déclenchée car une tache est notifiée à partir d&amp;rsquo;
     
     <item>
       <title>Hello Friend</title>
-      <link>lchagnoleau.github.io/post/hello/</link>
+      <link>https://lchagnoleau.github.io/post/hello/</link>
       <pubDate>Wed, 17 Sep 1986 00:00:00 +0000</pubDate>
       
-      <guid>lchagnoleau.github.io/post/hello/</guid>
+      <guid>https://lchagnoleau.github.io/post/hello/</guid>
       <description>
         
-          &lt;img src=&#34;lchagnoleau.github.io/img/hello.jpg&#34;/&gt;
+          &lt;img src=&#34;https://lchagnoleau.github.io/img/hello.jpg&#34;/&gt;
           
         
         

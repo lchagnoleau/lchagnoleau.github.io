@@ -5,12 +5,12 @@
     
     
     
-    <link>lchagnoleau.github.io/tags/</link>
+    <link>https://lchagnoleau.github.io/tags/</link>
     <description>Recent content in Tags on Loïc Chagnoleau</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>fr-FR</language>
     
-	<atom:link href="lchagnoleau.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://lchagnoleau.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
     
   </channel>
