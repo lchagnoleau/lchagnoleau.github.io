@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    
+      <title>
+        FreeRTOS from scratch sur STM32F446 Partie 1/2 ::
+        Loïc Chagnoleau — From scratch
+      </title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta
+  name="description"
+  content="Introduction Je vais vous montrer au travers de ces 2 articles comment créer un projet FreeRTOS from scratch et comment le flasher dans une Nucleo. On y verra notamment quels outils/logiciels sont nécessaire, comment démarrer simplement sur Nucleo, utiliser les outils de débogages et pour finir, comment intégrer FreeRTOS à nos projets et à quoi ça sert.
+Dans le premier article, on créera notre projet from scratch. Ce sera dans le second article que nous y intégrerons FreeRTOS."
+/>
+<meta
+  name="keywords"
+  content=""
+/>
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="lchagnoleau.github.io/posts/freertos1/" />
+
+
+
+
+
+<link rel="stylesheet" href="lchagnoleau.github.io/assets/style.css" />
+
+<link rel="stylesheet" href="lchagnoleau.github.io/style.css" />
+
+
+<link
+  rel="apple-touch-icon-precomposed"
+  sizes="144x144"
+  href="lchagnoleau.github.io/img/apple-touch-icon-144-precomposed.png"
+/>
+<link rel="shortcut icon" href="lchagnoleau.github.io/img/favicon.png" />
+
+
+<link href="lchagnoleau.github.io/assets/fonts/Inter-Italic.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="lchagnoleau.github.io/assets/fonts/Inter-Regular.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="lchagnoleau.github.io/assets/fonts/Inter-Medium.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="lchagnoleau.github.io/assets/fonts/Inter-MediumItalic.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="lchagnoleau.github.io/assets/fonts/Inter-Bold.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="lchagnoleau.github.io/assets/fonts/Inter-BoldItalic.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="FreeRTOS from scratch sur STM32F446 Partie 1/2"/>
+<meta name="twitter:description" content="Introduction Je vais vous montrer au travers de ces 2 articles comment créer un projet FreeRTOS from scratch et comment le flasher dans une Nucleo. On y verra notamment quels outils/logiciels sont nécessaire, comment démarrer simplement sur Nucleo, utiliser les outils de débogages et pour finir, comment intégrer FreeRTOS à nos projets et à quoi ça sert.
+Dans le premier article, on créera notre projet from scratch. Ce sera dans le second article que nous y intégrerons FreeRTOS."/>
+
+
+
+<meta property="og:title" content="FreeRTOS from scratch sur STM32F446 Partie 1/2" />
+<meta property="og:description" content="Introduction Je vais vous montrer au travers de ces 2 articles comment créer un projet FreeRTOS from scratch et comment le flasher dans une Nucleo. On y verra notamment quels outils/logiciels sont nécessaire, comment démarrer simplement sur Nucleo, utiliser les outils de débogages et pour finir, comment intégrer FreeRTOS à nos projets et à quoi ça sert.
+Dans le premier article, on créera notre projet from scratch. Ce sera dans le second article que nous y intégrerons FreeRTOS." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="lchagnoleau.github.io/posts/freertos1/" />
+<meta property="article:published_time" content="2021-01-23T19:18:00+01:00" />
+<meta property="article:modified_time" content="2021-01-23T19:18:00+01:00" /><meta property="og:site_name" content="Loïc Chagnoleau" />
+
+
+
+
+
+
+  </head>
+  <body class="dark-theme">
+    <div class="container">
+      <header class="header">
+  <span class="header__inner">
+    <a
+  href="/"
+  class="logo"
+  style="text-decoration: none;"
+>
+  
+    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367" />
+</svg>
+</span>
+    <span class="logo__text"
+      >Loïc Chagnoleau</span
+    >
+    <span class="logo__cursor"></span>
+  
+</a>
+
+    <span class="header__right">
+      
+        <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="lchagnoleau.github.io/about">À propos</a></li>
+        
+      
+      
+      
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="lchagnoleau.github.io/about">À propos</a></li>
+      
+    
+  </ul>
+</nav>
+
+        <span class="menu-trigger">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M0 0h24v24H0z" fill="none" />
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+          </svg>
+        </span>
+      
+      <span class="theme-toggle">
+        <svg
+  class="theme-toggler"
+  width="24"
+  height="24"
+  viewBox="0 0 48 48"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
+  3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
+  13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"
+  />
+</svg>
+
+      </span>
+    </span>
+  </span>
+</header>
+
+
+      <div class="content">
+        
+  
+  
+
+  <div class="post">
+    <h1 class="post-title">FreeRTOS from scratch sur STM32F446 Partie 1/2</h1>
+    <div class="post-meta">
+      
+        <span class="post-date">
+          23-01-2021
+        </span>
+
+        
+          
+        
+      
+
+      
+
+
+      
+    </div>
+
+    
+
+    
+
+    <div class="post-content">
+      
+      <h2 id="introduction">Introduction</h2>
+<p>Je vais vous montrer au travers de ces 2 articles comment créer un projet FreeRTOS from scratch et comment le flasher dans une Nucleo. On y verra notamment quels outils/logiciels sont nécessaire, comment démarrer simplement sur Nucleo, utiliser les outils de débogages et pour finir, comment intégrer FreeRTOS à nos projets et à quoi ça sert.</p>
+<p>Dans le premier article, on créera notre projet from scratch. Ce sera dans le second article que nous y intégrerons FreeRTOS.</p>
+<h1 id="liens-et-préparation">Liens et préparation</h1>
+<p>Personnellement, j&rsquo;utilise <a href="https://code.visualstudio.com/">Visual Studio Code</a> qui est un IDE modern, puissant, léger et très agréable.<br>
+Vous aurez également besoin des extensions suivantes : <a href="https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug">Cortex-Debug</a>, <a href="https://marketplace.visualstudio.com/items?itemName=austin.code-gnu-global">C++ Intellisense</a>, <a href="https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools">C/C++</a>.</p>
+<p>Concernant la carte Nucleo que j&rsquo;utilise, il s&rsquo;agit de la STM32F446RE. Tous les documents que j&rsquo;utilise à sont sujet sont disponible sur le site de ST : <a href="https://www.st.com/en/microcontrollers-microprocessors/stm32f446re.html">STM32F446RE</a> et la <a href="https://www.st.com/en/evaluation-tools/nucleo-f446re.html">Nucleo</a>.</p>
+<p>Il vous faudra également installer les différents paquets nécessaire à la compilation :</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo apt-get -y install gcc-arm-none-eabi binutils-arm-none-eabi build-essential make
+</code></pre></div><p>Enfin, les sources du projet sont sur mon <a href="https://github.com/lchagnoleau/STM32_Template">GitHub</a>.</p>
+<h1 id="création-du-projet-et-premier-code">Création du projet et premier code</h1>
+<h2 id="arborescence-du-projet">Arborescence du projet</h2>
+<p>J&rsquo;ai l’habitude d&rsquo;organiser mes projets comme suit :</p>
+<ul>
+<li>app
+<ul>
+<li>src</li>
+<li>inc</li>
+</ul>
+</li>
+<li>CMSIS</li>
+<li>drivers</li>
+<li>startup</li>
+<li>Third_Party
+<ul>
+<li>FreeRTOS</li>
+</ul>
+</li>
+</ul>
+<p>Le dossier <em>app/</em> contiendra nos sources d&rsquo;application (main, config&hellip;).<br>
+Le dossier <em>CMSIS/</em> contiendra les sources permettant l&rsquo;interaction avec le Cortex-ARM.<br>
+Le dossier <em>drivers/</em> contiendra les drivers fourni par ST.<br>
+Le dossier <em>startup/</em> contiendra le startup file.<br>
+Le dossier <em>Third_Party/</em> contiendra les sources FreeRTOS.</p>
+<h2 id="récupération-drivers">Récupération drivers</h2>
+<p>Commençons donc par récupérer les drivers fourni par ST pour notre Nucleo. Nous aurons besoins des fichiers CMSIS, startup et des drivers bas-niveau.</p>
+<p>Tous cela ce trouve sur le site de ST, à cette <a href="https://my.st.com/content/my_st_com/en/products/embedded-software/mcu-mpu-embedded-software/stm32-embedded-software/stm32-standard-peripheral-libraries/stsw-stm32065.license=1611380359274.product=STSW-STM32065.version=1.8.0.html">adresse</a>. Vous allez voir, cette archive contient beaucoup de chose, mais nous ne nous servirons pas de tout.</p>
+<p>C&rsquo;est parti ! On crée un joli répertoire sur notre ordinateur puis on crée les dossiers suivants:</p>
+<p><img src="/freertos/arbo_void-2.png" alt=""></p>
+<p>On copie :</p>
+<ul>
+<li>Tous les includes depuis <em>STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/CMSIS/Include</em> vers <em>CMSIS/inc</em></li>
+<li>Tous les includes depuis <em>STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/CMSIS/Device/ST/STM32F4xx/Include</em> vers <em>CMSIS/device/inc</em></li>
+<li>le fichier <em>system_stm32f4xx.c</em> depuis <em>STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/CMSIS/Device/ST/STM32F4xx/Source/Templates</em> vers <em>CMSIS/device/src</em></li>
+<li>Tous les includes depuis <em>STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/inc</em> vers <em>drivers/st/inc</em></li>
+<li>Toutes les sources depuis <em>STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/STM32F4xx_StdPeriph_Driver/src</em> vers _drivers/st/_src</li>
+<li>Le fichier <em>startup_stm32f446xx.s</em> depuis <em>STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Libraries/CMSIS/Device/ST/STM32F4xx/Source/Templates/SW4STM32</em> vers <em>startup/</em></li>
+<li>Le fichier <em>stm32f4xx_conf.h</em> depuis <em>STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Project/STM32F4xx_StdPeriph_Templates</em> vers <em>app/inc</em></li>
+<li>Le fichier STM32F446ZETx_FLASH.ld depuis <em>STM32F4xx_DSP_StdPeriph_Lib_V1.8.0/Project/STM32F4xx_StdPeriph_Templates/SW4STM32/STM32F446xx</em> vers le repertoire racine. On le renommera en <em>linker.ld</em></li>
+</ul>
+<p>Une dernière chose. Pensez à supprimer les fichiers <em>stm32f4xx_fsmc.c</em> et <em>stm32f4xx_fsmc.h</em> des répertoires <em>drivers/st/src</em> et <em>drivers/st/inc</em>. Nous n&rsquo;en aurons pas besoin et cela créera des conflits.</p>
+<h2 id="application">Application</h2>
+<p>Bien, comme dirai l&rsquo;autre, ça c&rsquo;est fait ! On va maintenant coder notre application.<br>
+Pour cela, créons 3 fichiers :</p>
+<ul>
+<li><em>app/src/main.c</em> : il contiendra notre main</li>
+<li><em>app/src/board.c</em> : nos différentes fonctions d&rsquo;initialisations</li>
+<li><em>app/inc/board.h</em> : les prototypes de board.c</li>
+</ul>
+<h3 id="boardh">board.h</h3>
+<p>Très simplement, nous allons créer les prototypes pour les fonctions d&rsquo;initialisation et d’interaction avec la led et le bouton poussoir :</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#75715e">#ifndef __BOARD_H
+</span><span style="color:#75715e">#define __BOARD_H
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdbool.h&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>
+
+<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">board_hardware_init</span>();
+<span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">is_button_pressed</span>();
+<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">toggle_led</span>();
+
+<span style="color:#75715e">#endif
+</span></code></pre></div><h2 id="boardc">board.c</h2>
+<p>Un peu plus gros mais pas plus compliqué, je vous le met ci dessous et j&rsquo;y reviens fonction par fonction juste après :</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;board.h&#34;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;stm32f4xx_rcc.h&#34;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;stm32f4xx_gpio.h&#34;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>
+<span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">led_init</span>();
+<span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">button_init</span>();
+
+<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">board_hardware_init</span>()
+{
+    <span style="color:#75715e">/* Set default RCC clock -&gt; 16MHz */</span>
+    RCC_DeInit();
+    SystemCoreClockUpdate();
+
+    <span style="color:#75715e">/* Init Led */</span>
+    led_init();
+
+    <span style="color:#75715e">/* Init button */</span>
+    button_init();
+}
+
+<span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">led_init</span>()
+{
+    <span style="color:#75715e">/* GREEN Led to PA5
+</span><span style="color:#75715e">    * 
+</span><span style="color:#75715e">    * the I/O is HIGH, the LED is on
+</span><span style="color:#75715e">    * the I/O is LOW,  the LED is off
+</span><span style="color:#75715e">    *
+</span><span style="color:#75715e">    */</span>
+
+    <span style="color:#75715e">/* Init struct */</span>
+    GPIO_InitTypeDef gpio_init_struct;
+
+    memset(<span style="color:#f92672">&amp;</span>gpio_init_struct, <span style="color:#ae81ff">0</span>, <span style="color:#66d9ef">sizeof</span>(gpio_init_struct));
+
+    GPIO_StructInit(<span style="color:#f92672">&amp;</span>gpio_init_struct);
+
+    <span style="color:#75715e">/* Start clock APB1 (GPIOA) */</span>
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+
+    <span style="color:#75715e">/* Init GPIO PA5 */</span>
+    gpio_init_struct.GPIO_Pin <span style="color:#f92672">=</span> GPIO_Pin_5;
+    gpio_init_struct.GPIO_Mode <span style="color:#f92672">=</span> GPIO_Mode_OUT;
+    GPIO_Init(GPIOA, <span style="color:#f92672">&amp;</span>gpio_init_struct);
+}
+
+<span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">button_init</span>()
+{
+    <span style="color:#75715e">/* B1 to PC13 */</span>
+
+    <span style="color:#75715e">/* Init struct */</span>
+    GPIO_InitTypeDef gpio_init_struct;
+
+    memset(<span style="color:#f92672">&amp;</span>gpio_init_struct, <span style="color:#ae81ff">0</span>, <span style="color:#66d9ef">sizeof</span>(gpio_init_struct));
+
+    GPIO_StructInit(<span style="color:#f92672">&amp;</span>gpio_init_struct);
+
+    <span style="color:#75715e">/* Start clock APB1 (GPIOC) */</span>
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+
+    <span style="color:#75715e">/* Init GPIO PA5 */</span>
+    gpio_init_struct.GPIO_Pin <span style="color:#f92672">=</span> GPIO_Pin_13;
+    gpio_init_struct.GPIO_Mode <span style="color:#f92672">=</span> GPIO_Mode_IN;
+    GPIO_Init(GPIOC, <span style="color:#f92672">&amp;</span>gpio_init_struct);
+}
+
+<span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">is_button_pressed</span>()
+{
+    <span style="color:#66d9ef">return</span> (<span style="color:#66d9ef">bool</span>) <span style="color:#f92672">!</span>GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_13);
+}
+
+<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">toggle_led</span>()
+{
+    GPIO_ToggleBits(GPIOA, GPIO_Pin_5);
+}
+</code></pre></div><p>Dans la fonction <em>board_hardware_init()</em>, nous configurons le RCC (Reset and Clock Control )par défaut. Le RCC étant le registre pilotant les horloge du processeur. Si nous faisons un CTRL+Click sur la fonction <em>RCC_DeInit();</em> nous arrivons sur la déclaration de la fonction qui nous indique :</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#75715e">/**
+</span><span style="color:#75715e">  * @brief  Resets the RCC clock configuration to the default reset state.
+</span><span style="color:#75715e">  * @note   The default reset state of the clock configuration is given below:
+</span><span style="color:#75715e">  *            - HSI ON and used as system clock source
+</span><span style="color:#75715e">  *            - HSE, PLL and PLLI2S OFF
+</span><span style="color:#75715e">  *            - AHB, APB1 and APB2 prescaler set to 1.
+</span><span style="color:#75715e">  *            - CSS, MCO1 and MCO2 OFF
+</span><span style="color:#75715e">  *            - All interrupts disabled
+</span><span style="color:#75715e">  * @note   This function doesn&#39;t modify the configuration of the
+</span><span style="color:#75715e">  *            - Peripheral clocks  
+</span><span style="color:#75715e">  *            - LSI, LSE and RTC clocks 
+</span><span style="color:#75715e">  * @param  None
+</span><span style="color:#75715e">  * @retval None
+</span><span style="color:#75715e">  */</span>
+</code></pre></div><p>Si on fait l&rsquo;effort d&rsquo;aller voir dans la datasheet, on s’aperçoit que le micro sera donc cadencé à 16 Mhz.<br>
+<em>SystemCoreClockUpdate();</em> permet de mettre à jour la variable indiquant la fréquence de l&rsquo;horloge.</p>
+<p>Dans la fonction <em>static void led_init()</em>, on configure la GPIO PA5, qui correspond sur la Nucleo à la led en sortie. la ligne <em>RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);</em> sert à activer le bus AHB1 sur lequel est branché le GPIO Port A. On le sait grâce à la doc :</p>
+<p><img src="/freertos/doc_st_horloge.png" alt=""></p>
+<p>La fonction <em>static void button_init()</em> est similaire à la fonction <em>led_init()</em>.</p>
+<p>Enfin, les fonctions <em>bool is_button_pressed()</em> et <em>void toggle_led()</em> utilise la librairie fourni par ST.</p>
+<h2 id="mainc">main.c</h2>
+<p>Pour finir, le fichier <em>main.c</em> :</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdlib.h&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;stm32f4xx.h&#34;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;board.h&#34;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>
+
+<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">void</span>)
+{
+    <span style="color:#75715e">/* Hardware board init */</span>
+    board_hardware_init();
+
+    <span style="color:#66d9ef">while</span>(<span style="color:#ae81ff">1</span>)
+    {
+        <span style="color:#66d9ef">if</span>(is_button_pressed())
+            toggle_led();
+    }
+
+    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+}
+</code></pre></div><p>Nous initialisons la carte avec la fonction précédemment vu et dans la boucle infini et afin de tester que tout va bien, on fait simplement bagoter la led dès qu&rsquo;on appui sur le bouton poussoir.<br>
+Reste plus qu'à compiler tout ça !</p>
+<h1 id="compilation">Compilation</h1>
+<p>Pour compiler toutes nos source, on va se créer un petit makefile.</p>
+<p>On crée donc un fichier <em>makefile</em> à la racine de notre projet :</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-makefile" data-lang="makefile">BINDIR <span style="color:#f92672">=</span> bin
+OBJDIR <span style="color:#f92672">=</span> obj
+OUTPUT <span style="color:#f92672">=</span> STM32F446_VS_CODE_TEMPLATE
+RELEASEDIR <span style="color:#f92672">=</span> release
+CC <span style="color:#f92672">=</span> arm-none-eabi-gcc
+RM <span style="color:#f92672">=</span> rm -rf
+MK <span style="color:#f92672">=</span> mkdir -p
+PWD <span style="color:#f92672">=</span> <span style="color:#66d9ef">$(</span>shell pwd<span style="color:#66d9ef">)</span>
+
+CC_INCLUDE <span style="color:#f92672">=</span> 	app/inc <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>				drivers/st/inc <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>				CMSIS/inc <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>				CMSIS/device/inc
+
+CC_SOURCE <span style="color:#f92672">=</span> 	app/src <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>				drivers/st/src <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>				CMSIS/device/src
+
+S_SOURCE <span style="color:#f92672">=</span> 		startup
+
+CC_SOURCES <span style="color:#f92672">:=</span> 	<span style="color:#66d9ef">$(</span>shell find <span style="color:#66d9ef">$(</span>CC_SOURCE<span style="color:#66d9ef">)</span> -maxdepth <span style="color:#ae81ff">1</span> -name <span style="color:#e6db74">&#39;*.c&#39;</span><span style="color:#66d9ef">)</span>
+S_SOURCES <span style="color:#f92672">:=</span> 	<span style="color:#66d9ef">$(</span>shell find <span style="color:#66d9ef">$(</span>S_SOURCE<span style="color:#66d9ef">)</span> -maxdepth <span style="color:#ae81ff">1</span> -name <span style="color:#e6db74">&#39;*.s&#39;</span><span style="color:#66d9ef">)</span>
+
+OBJECTS <span style="color:#f92672">:=</span>		<span style="color:#66d9ef">$(</span>addprefix <span style="color:#66d9ef">$(</span>OBJDIR<span style="color:#66d9ef">)</span>/, <span style="color:#66d9ef">$(</span>CC_SOURCES:.c<span style="color:#f92672">=</span>.o<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>S_SOURCES:.s<span style="color:#f92672">=</span>.o<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>STA_SOURCES:.S<span style="color:#f92672">=</span>.o<span style="color:#66d9ef">))</span>
+
+OBJDIRS <span style="color:#f92672">:=</span> 		<span style="color:#66d9ef">$(</span>patsubst %, <span style="color:#66d9ef">$(</span>OBJDIR<span style="color:#66d9ef">)</span>/%, <span style="color:#66d9ef">$(</span>CC_SOURCE<span style="color:#66d9ef">))</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>				<span style="color:#66d9ef">$(</span>patsubst %, <span style="color:#66d9ef">$(</span>OBJDIR<span style="color:#66d9ef">)</span>/%, <span style="color:#66d9ef">$(</span>S_SOURCE<span style="color:#66d9ef">))</span>
+
+VPATH <span style="color:#f92672">+=</span> <span style="color:#66d9ef">$(</span>CC_SOURCE<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>S_SOURCES<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>STA_SOURCES<span style="color:#66d9ef">)</span>
+
+CC_FLAGS <span style="color:#f92672">=</span> -mcpu<span style="color:#f92672">=</span>cortex-m4 -mthumb -mfloat-abi<span style="color:#f92672">=</span>hard -mfpu<span style="color:#f92672">=</span>fpv4-sp-d16 -specs<span style="color:#f92672">=</span>rdimon.specs -lc -lrdimon
+CC_FLAGS_OBJS <span style="color:#f92672">=</span> -DUSE_STDPERIPH_DRIVER -DSTM32F446xx
+CC_FLAGS_ELF <span style="color:#f92672">=</span> <span style="color:#66d9ef">$(</span>CC_FLAGS<span style="color:#66d9ef">)</span> -T<span style="color:#e6db74">&#34;linker.ld&#34;</span> -Wl,-Map<span style="color:#f92672">=</span>bin/output.map -Wl,--gc-sections
+CC_PARAMS<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>foreach d, <span style="color:#66d9ef">$(</span>CC_INCLUDE<span style="color:#66d9ef">)</span>, -I$d<span style="color:#66d9ef">)</span>
+
+<span style="color:#a6e22e">all</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">$(</span>OUTPUT<span style="color:#66d9ef">)</span>.elf
+
+<span style="color:#a6e22e">$(OUTPUT).elf</span><span style="color:#f92672">:</span> dir <span style="color:#66d9ef">$(</span>OBJDIRS<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>OBJECTS<span style="color:#66d9ef">)</span> linker.ld
+	@echo <span style="color:#e6db74">&#39;Building target: $@&#39;</span>
+	@echo <span style="color:#e6db74">&#39;Invoking: MCU GCC Linker&#39;</span>
+	<span style="color:#66d9ef">$(</span>CC<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>CC_FLAGS_ELF<span style="color:#66d9ef">)</span> -o <span style="color:#66d9ef">$(</span>BINDIR<span style="color:#66d9ef">)</span>/<span style="color:#66d9ef">$(</span>OUTPUT<span style="color:#66d9ef">)</span>.elf <span style="color:#66d9ef">$(</span>OBJECTS<span style="color:#66d9ef">)</span> -lm
+	@echo <span style="color:#e6db74">&#39;Finished building target: $@&#39;</span>
+	@echo <span style="color:#e6db74">&#39; &#39;</span>
+	<span style="color:#66d9ef">$(</span>MAKE<span style="color:#66d9ef">)</span> --no-print-directory post-build
+
+<span style="color:#a6e22e">$(OBJDIR)/%.o</span><span style="color:#f92672">:</span> %.s
+	@echo <span style="color:#e6db74">&#39;Building file: $@&#39;</span>
+	@echo <span style="color:#e6db74">&#39;Invoking: C Compiler&#39;</span>
+	<span style="color:#66d9ef">$(</span>CC<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>CC_FLAGS<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>CC_FLAGS_OBJS<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>CC_PARAMS<span style="color:#66d9ef">)</span> -DDEBUG -O0 -g3 -Wall -fmessage-length<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> -ffunction-sections -c -MMD -MP -MF<span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>@:%.o<span style="color:#f92672">=</span>%.d<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span> -MT<span style="color:#e6db74">&#34;</span>$@<span style="color:#e6db74">&#34;</span> -o $@ $&lt;
+	@echo <span style="color:#e6db74">&#39;Finished building: $@&#39;</span>
+	@echo <span style="color:#e6db74">&#39; &#39;</span>
+
+<span style="color:#a6e22e">$(OBJDIR)/%.o</span><span style="color:#f92672">:</span> %.S
+	@echo <span style="color:#e6db74">&#39;Building file: $@&#39;</span>
+	@echo <span style="color:#e6db74">&#39;Invoking: C Compiler&#39;</span>
+	<span style="color:#66d9ef">$(</span>CC<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>CC_FLAGS<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>CC_FLAGS_OBJS<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>CC_PARAMS<span style="color:#66d9ef">)</span> -DDEBUG -O0 -g3 -Wall -fmessage-length<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> -ffunction-sections -c -MMD -MP -MF<span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>@:%.o<span style="color:#f92672">=</span>%.d<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span> -MT<span style="color:#e6db74">&#34;</span>$@<span style="color:#e6db74">&#34;</span> -o $@ $&lt;
+	@echo <span style="color:#e6db74">&#39;Finished building: $@&#39;</span>
+	@echo <span style="color:#e6db74">&#39; &#39;</span>
+
+<span style="color:#a6e22e">$(OBJDIR)/%.o</span><span style="color:#f92672">:</span> %.c
+	@echo <span style="color:#e6db74">&#39;Building file: $@&#39;</span>
+	@echo <span style="color:#e6db74">&#39;Invoking: C Compiler&#39;</span>
+	<span style="color:#66d9ef">$(</span>CC<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>CC_FLAGS<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>CC_FLAGS_OBJS<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>CC_PARAMS<span style="color:#66d9ef">)</span> -DDEBUG -O0 -g3 -Wall -fmessage-length<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> -ffunction-sections -c -MMD -MP -MF<span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>@:%.o<span style="color:#f92672">=</span>%.d<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span> -MT<span style="color:#e6db74">&#34;</span>$@<span style="color:#e6db74">&#34;</span> -o $@ $&lt;
+	@echo <span style="color:#e6db74">&#39;Finished building: $@&#39;</span>
+	@echo <span style="color:#e6db74">&#39; &#39;</span>
+
+<span style="color:#a6e22e">$(OBJDIRS)</span><span style="color:#f92672">:</span>
+	mkdir -p $@ 
+
+<span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> post-build dir clean
+<span style="color:#a6e22e">post-build</span><span style="color:#f92672">:</span>
+	-@echo <span style="color:#e6db74">&#39;Generating binary and Printing size information:&#39;</span>
+	arm-none-eabi-objcopy -O binary <span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>BINDIR<span style="color:#66d9ef">)</span><span style="color:#e6db74">/</span><span style="color:#66d9ef">$(</span>OUTPUT<span style="color:#66d9ef">)</span><span style="color:#e6db74">.elf&#34;</span> <span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>BINDIR<span style="color:#66d9ef">)</span><span style="color:#e6db74">/</span><span style="color:#66d9ef">$(</span>OUTPUT<span style="color:#66d9ef">)</span><span style="color:#e6db74">.bin&#34;</span>
+	arm-none-eabi-size <span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>BINDIR<span style="color:#66d9ef">)</span><span style="color:#e6db74">/</span><span style="color:#66d9ef">$(</span>OUTPUT<span style="color:#66d9ef">)</span><span style="color:#e6db74">.elf&#34;</span>
+	-@echo <span style="color:#e6db74">&#39; &#39;</span>
+
+<span style="color:#a6e22e">dir</span><span style="color:#f92672">:</span>
+	@echo <span style="color:#e6db74">&#39;Creat output folders&#39;</span>
+	@echo <span style="color:#66d9ef">$(</span>OBJECTS<span style="color:#66d9ef">)</span>
+	<span style="color:#66d9ef">$(</span>MK<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>BINDIR<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>OBJDIR<span style="color:#66d9ef">)</span>
+	@echo <span style="color:#e6db74">&#39; &#39;</span>
+
+<span style="color:#a6e22e">clean</span><span style="color:#f92672">:</span>
+	@echo <span style="color:#e6db74">&#39;Clean output folders&#39;</span>
+	<span style="color:#66d9ef">$(</span>RM<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>BINDIR<span style="color:#66d9ef">)</span>/ <span style="color:#66d9ef">$(</span>OBJDIR<span style="color:#66d9ef">)</span>/ <span style="color:#66d9ef">$(</span>RELEASEDIR<span style="color:#66d9ef">)</span>/
+	@echo <span style="color:#e6db74">&#39; &#39;</span>
+</code></pre></div><p>C&rsquo;est un <em>makefile</em> assez classique et surtout très générique que vous pourrez réutiliser dans vos futurs projets. Je ne le détaille pas car cela serai un poil compliqué mais si vous le desirez, je peux en faire un prochain article.</p>
+<p>Maintenant, il suffit simplement de lancer la commande make pour lancer la compilation et générer notre binaire :</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">make
+</code></pre></div><p>A la fin, si tout ce passe bien, vous obtiendrez :</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">Generating binary and Printing size information:
+arm-none-eabi-objcopy -O binary <span style="color:#e6db74">&#34;bin/STM32F446_VS_CODE_TEMPLATE.elf&#34;</span> <span style="color:#e6db74">&#34;bin/STM32F446_VS_CODE_TEMPLATE.bin&#34;</span>
+arm-none-eabi-size <span style="color:#e6db74">&#34;bin/STM32F446_VS_CODE_TEMPLATE.elf&#34;</span>
+   text    data     bss     dec     hex filename
+   <span style="color:#ae81ff">2744</span>    <span style="color:#ae81ff">1104</span>    <span style="color:#ae81ff">1604</span>    <span style="color:#ae81ff">5452</span>    154c bin/STM32F446_VS_CODE_TEMPLATE.elf
+</code></pre></div><p>Signe que la compilation s&rsquo;est correctement terminée.</p>
+<p>nous allons maintenant flasher la carte.</p>
+<h1 id="test-sur-nucleo">Test sur Nucleo</h1>
+<h2 id="configuration-des-outils-de-débogages">Configuration des outils de débogages</h2>
+<p>Si vous utilisez une carte Nucleo comme moi, sachez que la partie supérieur de la carte est en fait un flasher/débogueur du nom de ST-LINKV2. Personnellement, cela fait plusieurs année que je convertie systématiquement mes carte STLINKV2 en flasher J-Link. Je trouve que grâce à cela, les performances en débogage sont accrue.</p>
+<p>Pour ce faire, il faut passer sur Windows très brièvement et télécharger l&rsquo;outils fournie par J-Link à cette <a href="https://www.segger.com/products/debug-probes/j-link/models/other-j-links/st-link-on-board/">adresse</a>. On suit les instructions fourni par SEGGER et on se retrouve avec une superbe carte J-Link. On peut du coup repasser sur Linux.</p>
+<p>On va maintenant configurer Studio Code. Dans la partie &ldquo;débogueur&rdquo; à gauche, on click sur &ldquo;create a launch.json file&rdquo;, puis on selectionne &ldquo;Cortex Debug&rdquo;.</p>
+<p><img src="/freertos/debog.png" alt=""></p>
+<p>Ainsi, il nous crée donc un fichier <em>.vscode/launch.json</em><br>
+On le modifie légèrement pour l&rsquo;adapter à notre projet :</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+    <span style="color:#960050;background-color:#1e0010">//</span> <span style="color:#960050;background-color:#1e0010">Use</span> <span style="color:#960050;background-color:#1e0010">IntelliSense</span> <span style="color:#960050;background-color:#1e0010">to</span> <span style="color:#960050;background-color:#1e0010">learn</span> <span style="color:#960050;background-color:#1e0010">about</span> <span style="color:#960050;background-color:#1e0010">possible</span> <span style="color:#960050;background-color:#1e0010">attributes.</span>
+    <span style="color:#960050;background-color:#1e0010">//</span> <span style="color:#960050;background-color:#1e0010">Hover</span> <span style="color:#960050;background-color:#1e0010">to</span> <span style="color:#960050;background-color:#1e0010">view</span> <span style="color:#960050;background-color:#1e0010">descriptions</span> <span style="color:#960050;background-color:#1e0010">of</span> <span style="color:#960050;background-color:#1e0010">existing</span> <span style="color:#960050;background-color:#1e0010">attributes.</span>
+    <span style="color:#960050;background-color:#1e0010">//</span> <span style="color:#960050;background-color:#1e0010">For</span> <span style="color:#960050;background-color:#1e0010">more</span> <span style="color:#960050;background-color:#1e0010">information,</span> <span style="color:#960050;background-color:#1e0010">visit:</span> <span style="color:#960050;background-color:#1e0010">https://go.microsoft.com/fwlink/?linkid=830387</span>
+    <span style="color:#f92672">&#34;version&#34;</span>: <span style="color:#e6db74">&#34;0.2.0&#34;</span>,
+    <span style="color:#f92672">&#34;configurations&#34;</span>: [
+        {
+            <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;Cortex Debug&#34;</span>,
+            <span style="color:#f92672">&#34;cwd&#34;</span>: <span style="color:#e6db74">&#34;${workspaceRoot}&#34;</span>,
+            <span style="color:#f92672">&#34;executable&#34;</span>: <span style="color:#e6db74">&#34;./bin/STM32F446_VS_CODE_TEMPLATE.elf&#34;</span>,
+            <span style="color:#f92672">&#34;request&#34;</span>: <span style="color:#e6db74">&#34;launch&#34;</span>,
+            <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;cortex-debug&#34;</span>,
+            <span style="color:#f92672">&#34;servertype&#34;</span>: <span style="color:#e6db74">&#34;jlink&#34;</span>,
+            <span style="color:#f92672">&#34;device&#34;</span>: <span style="color:#e6db74">&#34;STM32F446RE&#34;</span>,
+            <span style="color:#f92672">&#34;interface&#34;</span>: <span style="color:#e6db74">&#34;swd&#34;</span>,
+            <span style="color:#f92672">&#34;svdFile&#34;</span>: <span style="color:#e6db74">&#34;.vscode/STM32F446.svd&#34;</span>,
+            <span style="color:#f92672">&#34;runToMain&#34;</span>: <span style="color:#66d9ef">true</span>,
+        }
+    ]
+}
+</code></pre></div><p>Remarquez que j&rsquo;ai ajouté une ligne <em>&ldquo;svdFile&rdquo;: &ldquo;.vscode/STM32F446.svd&rdquo;</em>. Un fichier svd contient les adresses des différents périphériques du microcontrôleur. On pourra donc lors du débogage parcourir les périphériques à la volée. Ce n&rsquo;est pas obligatoire mais vous pouvez récupérer ce fichier svd <a href="https://github.com/posborne/cmsis-svd/blob/master/data/STMicro/STM32F446.svd">ici</a> et le placer dans le dossier <em>.vscode</em></p>
+<h2 id="flash">Flash</h2>
+<p>On a presque fini. Ne reste plus qu'à envoyer notre binaire sur la cible. Il suffit d&rsquo;appuyer sur la touche F5. Le programme est ensuite téléversé sur dans la flash du microcontrôleur.</p>
+<p>L&rsquo;outils de débogage se lance alors :</p>
+<p><img src="/freertos/arbo.png" alt=""></p>
+<p>Le programme s&rsquo;est gentiment arrêté à la première instruction de notre main. On peut lancer le code, mettre pause&hellip; grâce aux boutons au dessus. Très utile aussi, nous avons la possibilité de mettre en place des <em>breakpoints</em> comme je l&rsquo;ai fait ici à la ligne 14. Il suffit juste de cliquer à côté du chiffre de la ligne en question. Ainsi, le code se mettra en pause dès qu&rsquo;il atteindra cette ligne. Dans le cas présent, dès que j&rsquo;appuierai sur le bouton poussoir.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>Voilà, nous avons vu comment créer un projet from scratch pour jouer avec notre Nucleo. Je sais qu&rsquo;il existe pléthore d&rsquo;IDE permettant de générer du code et ce genre de projet automatiquement. L&rsquo;avantage avec la méthode que je vous ai expliquée, c&rsquo;est que l&rsquo;on comprends beaucoup mieux ce que l&rsquo;on fait. On peut aussi très facilement utiliser l&rsquo;IDE que l&rsquo;on veut et surtout, il n&rsquo;y a aucun fichier superflue. N&rsquo;hésitez pas à me dire ce que vous en pensez en commentaire. La semaine prochaine ferai une deuxième partie ou l&rsquo;on intégrera le noyaux FreeRTOS !<br>
+N&rsquo;oubliez pas que vous pouvez retrouver les sources du projet sur <a href="https://github.com/lchagnoleau/STM32_Template">GitHub</a>.</p>
+
+    </div>
+    
+      
+        <div class="pagination">
+          <div class="pagination__title">
+            <span class="pagination__title-h"
+              >Lire d&#39;autres articles</span
+            >
+            <hr />
+          </div>
+          <div class="pagination__buttons">
+            
+              <span class="button previous">
+                <a href="lchagnoleau.github.io/posts/freertos2/">
+                  <span class="button__icon">←</span>
+                  <span class="button__text">FreeRTOS from scratch sur STM32F446 Partie 2/2</span>
+                </a>
+              </span>
+            
+            
+              <span class="button next">
+                <a href="lchagnoleau.github.io/posts/configassert/">
+                  <span class="button__text">FreeRTOS : configASSERT( xTaskToNotify )</span>
+                  <span class="button__icon">→</span>
+                </a>
+              </span>
+            
+          </div>
+        </div>
+      
+    
+
+    
+      
+        
+
+      
+    
+  </div>
+
+      </div>
+
+      
+        <footer class="footer">
+  <div class="footer__inner">
+    
+      <a
+  href="/"
+  class="logo"
+  style="text-decoration: none;"
+>
+  
+    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367" />
+</svg>
+</span>
+    <span class="logo__text"
+      >Loïc Chagnoleau</span
+    >
+    <span class="logo__cursor"></span>
+  
+</a>
+
+      <div class="copyright">
+        <span
+          >© 2021 Powered by
+          <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a></span
+        >
+        <span
+          >Theme created by
+          <a href="https://twitter.com/panr" target="_blank" rel="noopener">panr</a></span
+        >
+      </div>
+    
+  </div>
+</footer>
+
+<script src="lchagnoleau.github.io/assets/main.js"></script>
+<script src="lchagnoleau.github.io/assets/prism.js"></script>
+
+
+      
+    </div>
+
+    
+  </body>
+</html>

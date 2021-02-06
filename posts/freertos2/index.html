@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    
+      <title>
+        FreeRTOS from scratch sur STM32F446 Partie 2/2 ::
+        Loïc Chagnoleau — From scratch
+      </title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta
+  name="description"
+  content="On s&amp;rsquo;attaque aujourd&amp;rsquo;hui à la deuxième partie de l&amp;rsquo;article à savoir, l&amp;rsquo;intégration dans notre projet d&amp;rsquo;un système d&amp;rsquo;exploitation temps réel : FreeRTOS.
+Qu&amp;rsquo;est ce qu&amp;rsquo;un OS temps réel ? Dans les systèmes embarqués, il y a des cas ou l&amp;rsquo;on est contraint de respecter des temps d’exécutions donnés. Pennons l&amp;rsquo;exemple du système Airbag dans l&amp;rsquo;automobile. Il est primordial lors d&amp;rsquo;un choc frontal que l&amp;rsquo;Airbag se déclenche en x ms. ni plus, ni moins."
+/>
+<meta
+  name="keywords"
+  content=""
+/>
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="lchagnoleau.github.io/posts/freertos2/" />
+
+
+
+
+
+<link rel="stylesheet" href="lchagnoleau.github.io/assets/style.css" />
+
+<link rel="stylesheet" href="lchagnoleau.github.io/style.css" />
+
+
+<link
+  rel="apple-touch-icon-precomposed"
+  sizes="144x144"
+  href="lchagnoleau.github.io/img/apple-touch-icon-144-precomposed.png"
+/>
+<link rel="shortcut icon" href="lchagnoleau.github.io/img/favicon.png" />
+
+
+<link href="lchagnoleau.github.io/assets/fonts/Inter-Italic.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="lchagnoleau.github.io/assets/fonts/Inter-Regular.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="lchagnoleau.github.io/assets/fonts/Inter-Medium.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="lchagnoleau.github.io/assets/fonts/Inter-MediumItalic.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="lchagnoleau.github.io/assets/fonts/Inter-Bold.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="lchagnoleau.github.io/assets/fonts/Inter-BoldItalic.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="FreeRTOS from scratch sur STM32F446 Partie 2/2"/>
+<meta name="twitter:description" content="On s&rsquo;attaque aujourd&rsquo;hui à la deuxième partie de l&rsquo;article à savoir, l&rsquo;intégration dans notre projet d&rsquo;un système d&rsquo;exploitation temps réel : FreeRTOS.
+Qu&rsquo;est ce qu&rsquo;un OS temps réel ? Dans les systèmes embarqués, il y a des cas ou l&rsquo;on est contraint de respecter des temps d’exécutions donnés. Pennons l&rsquo;exemple du système Airbag dans l&rsquo;automobile. Il est primordial lors d&rsquo;un choc frontal que l&rsquo;Airbag se déclenche en x ms. ni plus, ni moins."/>
+
+
+
+<meta property="og:title" content="FreeRTOS from scratch sur STM32F446 Partie 2/2" />
+<meta property="og:description" content="On s&rsquo;attaque aujourd&rsquo;hui à la deuxième partie de l&rsquo;article à savoir, l&rsquo;intégration dans notre projet d&rsquo;un système d&rsquo;exploitation temps réel : FreeRTOS.
+Qu&rsquo;est ce qu&rsquo;un OS temps réel ? Dans les systèmes embarqués, il y a des cas ou l&rsquo;on est contraint de respecter des temps d’exécutions donnés. Pennons l&rsquo;exemple du système Airbag dans l&rsquo;automobile. Il est primordial lors d&rsquo;un choc frontal que l&rsquo;Airbag se déclenche en x ms. ni plus, ni moins." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="lchagnoleau.github.io/posts/freertos2/" />
+<meta property="article:published_time" content="2021-01-31T12:15:00+01:00" />
+<meta property="article:modified_time" content="2021-01-31T12:15:00+01:00" /><meta property="og:site_name" content="Loïc Chagnoleau" />
+
+
+
+
+
+
+  </head>
+  <body class="dark-theme">
+    <div class="container">
+      <header class="header">
+  <span class="header__inner">
+    <a
+  href="/"
+  class="logo"
+  style="text-decoration: none;"
+>
+  
+    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367" />
+</svg>
+</span>
+    <span class="logo__text"
+      >Loïc Chagnoleau</span
+    >
+    <span class="logo__cursor"></span>
+  
+</a>
+
+    <span class="header__right">
+      
+        <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="lchagnoleau.github.io/about">À propos</a></li>
+        
+      
+      
+      
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="lchagnoleau.github.io/about">À propos</a></li>
+      
+    
+  </ul>
+</nav>
+
+        <span class="menu-trigger">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M0 0h24v24H0z" fill="none" />
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+          </svg>
+        </span>
+      
+      <span class="theme-toggle">
+        <svg
+  class="theme-toggler"
+  width="24"
+  height="24"
+  viewBox="0 0 48 48"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
+  3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
+  13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"
+  />
+</svg>
+
+      </span>
+    </span>
+  </span>
+</header>
+
+
+      <div class="content">
+        
+  
+  
+
+  <div class="post">
+    <h1 class="post-title">FreeRTOS from scratch sur STM32F446 Partie 2/2</h1>
+    <div class="post-meta">
+      
+        <span class="post-date">
+          31-01-2021
+        </span>
+
+        
+          
+        
+      
+
+      
+
+
+      
+    </div>
+
+    
+
+    
+
+    <div class="post-content">
+      
+      <p>On s&rsquo;attaque aujourd&rsquo;hui à la deuxième partie de l&rsquo;article à savoir, l&rsquo;intégration dans notre projet d&rsquo;un système d&rsquo;exploitation temps réel : FreeRTOS.</p>
+<h1 id="quest-ce-quun-os-temps-réel-">Qu&rsquo;est ce qu&rsquo;un OS temps réel ?</h1>
+<p>Dans les systèmes embarqués, il y a des cas ou l&rsquo;on est contraint de respecter des temps d’exécutions donnés. Pennons l&rsquo;exemple du système Airbag dans l&rsquo;automobile. Il est primordial lors d&rsquo;un choc frontal que l&rsquo;Airbag se déclenche en <em>x</em> ms. ni plus, ni moins. Il est donc important de garantir un délai fixe entre le déclencheur et l&rsquo;action. Comment faire cela avec un processeur qui gère déjà une multitude de capteurs et fonctionnalités ? Grâce un OS temps réel.<br>
+Un RTOS (<em>Real Time Operating System</em>) se défini donc comme suit :</p>
+<ul>
+<li>Il est capable gérer le temps de manière <strong>précise et répétable</strong>. Par exemple, on souhaite qu&rsquo;une action se déclenche 1 seconde après un événement plus ou moins 1ms. Un RTOS permettra se genre de comportement à l&rsquo;inverse d&rsquo;un OS non temps réel comme Windows ou autre.</li>
+<li>Pour ce faire, l&rsquo;OS temps réel fonctionne par <strong>tâche dont il gère les priorités</strong>. C&rsquo;est ce point là qui est important car, Windows aussi gère des tâches, mais il ne gère pas les priorités.</li>
+</ul>
+<p>Maintenant que l&rsquo;on a vu rapidement ce qu&rsquo;est un OS temps réel, passons à la pratique</p>
+<h1 id="installation-de-freertos">Installation de FreeRTOS</h1>
+<p>RDV sur la page de téléchargement de <a href="https://www.freertos.org/a00104.html">FreeRTOS</a>.<br>
+Ensuite, on crée un répertoire <em>Third_Party/FreeRTOS</em> à la racine de notre projet. C&rsquo;est ici que nous allons copier les sources de FreeRTOS.</p>
+<p>On copie donc tout ce qui se trouve dans <em>FreeRTOSv202012.00/FreeRTOS/Source</em> de ce que l&rsquo;on vient de télécharger dans <em>Third_Party/FreeRTOS</em> fraîchement créé.</p>
+<p>Il faut par contre faire un peu de ménage car nous n&rsquo;avons pas besoin de toutes les sources.</p>
+<ul>
+<li>Dans <em>Third_Party/FreeRTOS/portable</em> : On supprime tout <strong>sauf</strong> <em>GCC</em>/ et <em>MemMang</em>/</li>
+<li>Dans <em>Third_Party/FreeRTOS/portable/GCC</em> : On supprime tout <strong>sauf</strong> <em>ARM_CM4F</em>/ (si comme moi vous utilisez un Cortex-M4)</li>
+<li>Dans <em>Third_Party/FreeRTOS/portable/Memang</em> : On supprime tout <strong>sauf</strong> <em>heap_4.c</em></li>
+</ul>
+<p>Il nous faut également un exemple de fichier de configuration. On peut le récupérer ici :<br>
+<em>FreeRTOSv202012.00/FreeRTOS/Demo/CORTEX_M4F_STM32F407ZG-SK/FreeRTOSConfig.h</em><br>
+Et on le place dans <em>app/inc</em>.</p>
+<h1 id="intégration-au-projet">Intégration au projet</h1>
+<h2 id="freertosconfigh">FreeRTOSConfig.h</h2>
+<p>Il nous faut légèrement modifier le fichier de configuration de FreeRTOS afin de l&rsquo;adapter à notre projet :</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#75715e">/*
+</span><span style="color:#75715e"> * FreeRTOS V202012.00
+</span><span style="color:#75715e"> * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+</span><span style="color:#75715e"> *
+</span><span style="color:#75715e"> * Permission is hereby granted, free of charge, to any person obtaining a copy of
+</span><span style="color:#75715e"> * this software and associated documentation files (the &#34;Software&#34;), to deal in
+</span><span style="color:#75715e"> * the Software without restriction, including without limitation the rights to
+</span><span style="color:#75715e"> * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+</span><span style="color:#75715e"> * the Software, and to permit persons to whom the Software is furnished to do so,
+</span><span style="color:#75715e"> * subject to the following conditions:
+</span><span style="color:#75715e"> *
+</span><span style="color:#75715e"> * The above copyright notice and this permission notice shall be included in all
+</span><span style="color:#75715e"> * copies or substantial portions of the Software.
+</span><span style="color:#75715e"> *
+</span><span style="color:#75715e"> * THE SOFTWARE IS PROVIDED &#34;AS IS&#34;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+</span><span style="color:#75715e"> * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+</span><span style="color:#75715e"> * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+</span><span style="color:#75715e"> * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+</span><span style="color:#75715e"> * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+</span><span style="color:#75715e"> * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+</span><span style="color:#75715e"> *
+</span><span style="color:#75715e"> * http://www.FreeRTOS.org
+</span><span style="color:#75715e"> * http://aws.amazon.com/freertos
+</span><span style="color:#75715e"> *
+</span><span style="color:#75715e"> * 1 tab == 4 spaces!
+</span><span style="color:#75715e"> */</span>
+
+
+<span style="color:#75715e">#ifndef FREERTOS_CONFIG_H
+</span><span style="color:#75715e">#define FREERTOS_CONFIG_H
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">/*-----------------------------------------------------------
+</span><span style="color:#75715e"> * Application specific definitions.
+</span><span style="color:#75715e"> *
+</span><span style="color:#75715e"> * These definitions should be adjusted for your particular hardware and
+</span><span style="color:#75715e"> * application requirements.
+</span><span style="color:#75715e"> *
+</span><span style="color:#75715e"> * THESE PARAMETERS ARE DESCRIBED WITHIN THE &#39;CONFIGURATION&#39; SECTION OF THE
+</span><span style="color:#75715e"> * FreeRTOS API DOCUMENTATION AVAILABLE ON THE FreeRTOS.org WEB SITE.
+</span><span style="color:#75715e"> *
+</span><span style="color:#75715e"> * See http://www.freertos.org/a00110.html
+</span><span style="color:#75715e"> *----------------------------------------------------------*/</span>
+
+<span style="color:#75715e">/* Ensure stdint is only used by the compiler, and not the assembler. */</span>
+<span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;stm32f4xx.h&#34;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">#define configUSE_PREEMPTION			1
+</span><span style="color:#75715e">#define configUSE_IDLE_HOOK				0
+</span><span style="color:#75715e">#define configUSE_TICK_HOOK				0
+</span><span style="color:#75715e">#define configCPU_CLOCK_HZ				( SystemCoreClock )
+</span><span style="color:#75715e">#define configTICK_RATE_HZ				( ( TickType_t ) 1000 )
+</span><span style="color:#75715e">#define configMAX_PRIORITIES			( 5 )
+</span><span style="color:#75715e">#define configMINIMAL_STACK_SIZE		( ( unsigned short ) 130 )
+</span><span style="color:#75715e">#define configTOTAL_HEAP_SIZE			( ( size_t ) ( 75 * 1024 ) )
+</span><span style="color:#75715e">#define configMAX_TASK_NAME_LEN			( 10 )
+</span><span style="color:#75715e">#define configUSE_TRACE_FACILITY		1
+</span><span style="color:#75715e">#define configUSE_16_BIT_TICKS			0
+</span><span style="color:#75715e">#define configIDLE_SHOULD_YIELD			1
+</span><span style="color:#75715e">#define configUSE_MUTEXES				1
+</span><span style="color:#75715e">#define configQUEUE_REGISTRY_SIZE		8
+</span><span style="color:#75715e">#define configCHECK_FOR_STACK_OVERFLOW	0
+</span><span style="color:#75715e">#define configUSE_RECURSIVE_MUTEXES		1
+</span><span style="color:#75715e">#define configUSE_MALLOC_FAILED_HOOK	0
+</span><span style="color:#75715e">#define configUSE_APPLICATION_TASK_TAG	0
+</span><span style="color:#75715e">#define configUSE_COUNTING_SEMAPHORES	1
+</span><span style="color:#75715e">#define configGENERATE_RUN_TIME_STATS	0
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">/* Co-routine definitions. */</span>
+<span style="color:#75715e">#define configUSE_CO_ROUTINES 		0
+</span><span style="color:#75715e">#define configMAX_CO_ROUTINE_PRIORITIES ( 2 )
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">/* Software timer definitions. */</span>
+<span style="color:#75715e">#define configUSE_TIMERS				1
+</span><span style="color:#75715e">#define configTIMER_TASK_PRIORITY		( 2 )
+</span><span style="color:#75715e">#define configTIMER_QUEUE_LENGTH		10
+</span><span style="color:#75715e">#define configTIMER_TASK_STACK_DEPTH	( configMINIMAL_STACK_SIZE * 2 )
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">/* Set the following definitions to 1 to include the API function, or zero
+</span><span style="color:#75715e">to exclude the API function. */</span>
+<span style="color:#75715e">#define INCLUDE_vTaskPrioritySet		1
+</span><span style="color:#75715e">#define INCLUDE_uxTaskPriorityGet		1
+</span><span style="color:#75715e">#define INCLUDE_vTaskDelete				1
+</span><span style="color:#75715e">#define INCLUDE_vTaskCleanUpResources	1
+</span><span style="color:#75715e">#define INCLUDE_vTaskSuspend			1
+</span><span style="color:#75715e">#define INCLUDE_vTaskDelayUntil			1
+</span><span style="color:#75715e">#define INCLUDE_vTaskDelay				1
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">/* Cortex-M specific definitions. */</span>
+<span style="color:#75715e">#ifdef __NVIC_PRIO_BITS
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">/* __BVIC_PRIO_BITS will be specified when CMSIS is being used. */</span>
+	<span style="color:#75715e">#define configPRIO_BITS       		__NVIC_PRIO_BITS
+</span><span style="color:#75715e">#else
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">#define configPRIO_BITS       		4        </span><span style="color:#75715e">/* 15 priority levels */</span><span style="color:#75715e">
+</span><span style="color:#75715e">#endif
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">/* The lowest interrupt priority that can be used in a call to a &#34;set priority&#34;
+</span><span style="color:#75715e">function. */</span>
+<span style="color:#75715e">#define configLIBRARY_LOWEST_INTERRUPT_PRIORITY			0xf
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">/* The highest interrupt priority that can be used by any interrupt service
+</span><span style="color:#75715e">routine that makes calls to interrupt safe FreeRTOS API functions.  DO NOT CALL
+</span><span style="color:#75715e">INTERRUPT SAFE FREERTOS API FUNCTIONS FROM ANY INTERRUPT THAT HAS A HIGHER
+</span><span style="color:#75715e">PRIORITY THAN THIS! (higher priorities are lower numeric values. */</span>
+<span style="color:#75715e">#define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY	5
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">/* Interrupt priorities used by the kernel port layer itself.  These are generic
+</span><span style="color:#75715e">to all Cortex-M ports, and do not rely on any particular library functions. */</span>
+<span style="color:#75715e">#define configKERNEL_INTERRUPT_PRIORITY 		( configLIBRARY_LOWEST_INTERRUPT_PRIORITY &lt;&lt; (8 - configPRIO_BITS) )
+</span><span style="color:#75715e"></span><span style="color:#75715e">/* !!!! configMAX_SYSCALL_INTERRUPT_PRIORITY must not be set to zero !!!!
+</span><span style="color:#75715e">See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html. */</span>
+<span style="color:#75715e">#define configMAX_SYSCALL_INTERRUPT_PRIORITY 	( configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY &lt;&lt; (8 - configPRIO_BITS) )
+</span><span style="color:#75715e"></span>	
+<span style="color:#75715e">/* Normal assert() semantics without relying on the provision of an assert.h
+</span><span style="color:#75715e">header file. */</span>
+<span style="color:#75715e">#define configASSERT( x ) if( ( x ) == 0 ) { taskDISABLE_INTERRUPTS(); for( ;; ); }	
+</span><span style="color:#75715e"></span>	
+<span style="color:#75715e">/* Definitions that map the FreeRTOS port interrupt handlers to their CMSIS
+</span><span style="color:#75715e">standard names. */</span>
+<span style="color:#75715e">#define vPortSVCHandler SVC_Handler
+</span><span style="color:#75715e">#define xPortPendSVHandler PendSV_Handler
+</span><span style="color:#75715e">#define xPortSysTickHandler SysTick_Handler
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">#endif </span><span style="color:#75715e">/* FREERTOS_CONFIG_H */</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>
+
+</code></pre></div><ul>
+<li>ligne 45 : On inclut le fichier &ldquo;<em>stm32f4xx.h</em>&rdquo;</li>
+<li>ligne 48 et 49 : On désactive <em>configUSE_IDLE_HOOK</em> et <em>configUSE_TICK_HOOK</em>. Il s&rsquo;agit de fonction de callbacks à implémenter afin de gérer certaines fonctionnalités de FreeRTOS. Ici, on veut faire quelque chose de simple donc pas besoin.</li>
+<li>ligne 61 et 63 : Idem pour <em>configCHECK_FOR_STACK_OVERFLOW</em> et <em>configUSE_MALLOC_FAILED_HOOK</em></li>
+</ul>
+<h2 id="mainc">main.c</h2>
+<p>Il y a des choses à dire ici. Dans l&rsquo;ordre des modifications :</p>
+<ol>
+<li>On inclut les fichiers <em>FreeRTOS.h</em> et <em>task.h</em></li>
+<li>FreeRTOS fonctionne par tâche. Et chaque tâche créée à besoin d&rsquo;un TCB (<em>task control block</em>). Le TCB contient les différentes informations nécessaire à chaque tâche.</li>
+<li>Concrètement, chaque tâche sera définit par une fonction. On crée donc le prototype de cette fonction et la fonction en elle même. Dans notre exemple, on fait simplement bagoter la led chaque seconde.</li>
+<li>Dans la fonction main(), On crée notre tache grâce à la fonction xTaskCreate(). Cette fonction prend en argument : un pointeur vers la fonction de notre tâche (défini au point 3), le nom de la tâche, la taille de la stack à allouer, d'éventuels paramètres, la priorité de la tâche (0 = priorité la plus faible) et le handler de la tâche (défini au point 2).</li>
+<li>On lance le scheduler.</li>
+</ol>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdlib.h&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;stm32f4xx.h&#34;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;board.h&#34;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;FreeRTOS.h&#34;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;task.h&#34;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>
+TaskHandle_t xTaskLedHandle1 <span style="color:#f92672">=</span> NULL;
+
+<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">vTask_Led_handler_1</span>(<span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>params);
+
+<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">void</span>)
+{
+    <span style="color:#75715e">/* Hardware board init */</span>
+    board_hardware_init();
+
+    <span style="color:#75715e">/* Create task */</span>
+    xTaskCreate(vTask_Led_handler_1, <span style="color:#e6db74">&#34;Task-1&#34;</span>, <span style="color:#ae81ff">500</span>, NULL, <span style="color:#ae81ff">1</span>, <span style="color:#f92672">&amp;</span>xTaskLedHandle1);
+
+    <span style="color:#75715e">/* Start scheduler */</span>
+    vTaskStartScheduler();
+
+    <span style="color:#66d9ef">while</span>(<span style="color:#ae81ff">1</span>)
+    {
+        <span style="color:#75715e">/* Never go here */</span>
+    }
+
+    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+}
+
+<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">vTask_Led_handler_1</span>(<span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>params)
+{
+	<span style="color:#66d9ef">while</span>(<span style="color:#ae81ff">1</span>)
+	{
+        toggle_led();
+        vTaskDelay(pdMS_TO_TICKS(<span style="color:#ae81ff">1000</span>));
+	}
+}
+</code></pre></div><h2 id="makefile">makefile</h2>
+<p>Puisque l&rsquo;on a ajouter des fichiers à notre projet, il faut adapter notre makefile en y rajoutant simplement les dossier de FreeRTOS :</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-makefile" data-lang="makefile">BINDIR <span style="color:#f92672">=</span> bin
+OBJDIR <span style="color:#f92672">=</span> obj
+OUTPUT <span style="color:#f92672">=</span> STM32F446_VS_CODE_TEMPLATE
+RELEASEDIR <span style="color:#f92672">=</span> release
+CC <span style="color:#f92672">=</span> arm-none-eabi-gcc
+RM <span style="color:#f92672">=</span> rm -rf
+MK <span style="color:#f92672">=</span> mkdir -p
+PWD <span style="color:#f92672">=</span> <span style="color:#66d9ef">$(</span>shell pwd<span style="color:#66d9ef">)</span>
+
+CC_INCLUDE <span style="color:#f92672">=</span> 	app/inc <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>				drivers/st/inc <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>				CMSIS/inc <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>				CMSIS/device/inc <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>				Third_Party/FreeRTOS/include <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>				Third_Party/FreeRTOS/portable/GCC/ARM_CM4F <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>
+CC_SOURCE <span style="color:#f92672">=</span> 	app/src <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>				drivers/st/src <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>				CMSIS/device/src <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>				Third_Party/FreeRTOS <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>				Third_Party/FreeRTOS/portable/GCC/ARM_CM4F <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>				Third_Party/FreeRTOS/portable/MemMang <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>
+S_SOURCE <span style="color:#f92672">=</span> 		startup
+
+CC_SOURCES <span style="color:#f92672">:=</span> 	<span style="color:#66d9ef">$(</span>shell find <span style="color:#66d9ef">$(</span>CC_SOURCE<span style="color:#66d9ef">)</span> -maxdepth <span style="color:#ae81ff">1</span> -name <span style="color:#e6db74">&#39;*.c&#39;</span><span style="color:#66d9ef">)</span>
+S_SOURCES <span style="color:#f92672">:=</span> 	<span style="color:#66d9ef">$(</span>shell find <span style="color:#66d9ef">$(</span>S_SOURCE<span style="color:#66d9ef">)</span> -maxdepth <span style="color:#ae81ff">1</span> -name <span style="color:#e6db74">&#39;*.s&#39;</span><span style="color:#66d9ef">)</span>
+
+OBJECTS <span style="color:#f92672">:=</span>		<span style="color:#66d9ef">$(</span>addprefix <span style="color:#66d9ef">$(</span>OBJDIR<span style="color:#66d9ef">)</span>/, <span style="color:#66d9ef">$(</span>CC_SOURCES:.c<span style="color:#f92672">=</span>.o<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>S_SOURCES:.s<span style="color:#f92672">=</span>.o<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>STA_SOURCES:.S<span style="color:#f92672">=</span>.o<span style="color:#66d9ef">))</span>
+
+OBJDIRS <span style="color:#f92672">:=</span> 		<span style="color:#66d9ef">$(</span>patsubst %, <span style="color:#66d9ef">$(</span>OBJDIR<span style="color:#66d9ef">)</span>/%, <span style="color:#66d9ef">$(</span>CC_SOURCE<span style="color:#66d9ef">))</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>				<span style="color:#66d9ef">$(</span>patsubst %, <span style="color:#66d9ef">$(</span>OBJDIR<span style="color:#66d9ef">)</span>/%, <span style="color:#66d9ef">$(</span>S_SOURCE<span style="color:#66d9ef">))</span>
+
+VPATH <span style="color:#f92672">+=</span> <span style="color:#66d9ef">$(</span>CC_SOURCE<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>S_SOURCES<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>STA_SOURCES<span style="color:#66d9ef">)</span>
+
+CC_FLAGS <span style="color:#f92672">=</span> -mcpu<span style="color:#f92672">=</span>cortex-m4 -mthumb -mfloat-abi<span style="color:#f92672">=</span>hard -mfpu<span style="color:#f92672">=</span>fpv4-sp-d16 -specs<span style="color:#f92672">=</span>rdimon.specs -lc -lrdimon
+CC_FLAGS_OBJS <span style="color:#f92672">=</span> -DUSE_STDPERIPH_DRIVER -DSTM32F446xx
+CC_FLAGS_ELF <span style="color:#f92672">=</span> <span style="color:#66d9ef">$(</span>CC_FLAGS<span style="color:#66d9ef">)</span> -T<span style="color:#e6db74">&#34;linker.ld&#34;</span> -Wl,-Map<span style="color:#f92672">=</span>bin/output.map -Wl,--gc-sections
+CC_PARAMS<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>foreach d, <span style="color:#66d9ef">$(</span>CC_INCLUDE<span style="color:#66d9ef">)</span>, -I$d<span style="color:#66d9ef">)</span>
+
+<span style="color:#a6e22e">all</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">$(</span>OUTPUT<span style="color:#66d9ef">)</span>.elf
+
+<span style="color:#a6e22e">$(OUTPUT).elf</span><span style="color:#f92672">:</span> dir <span style="color:#66d9ef">$(</span>OBJDIRS<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>OBJECTS<span style="color:#66d9ef">)</span> linker.ld
+	@echo <span style="color:#e6db74">&#39;Building target: $@&#39;</span>
+	@echo <span style="color:#e6db74">&#39;Invoking: MCU GCC Linker&#39;</span>
+	<span style="color:#66d9ef">$(</span>CC<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>CC_FLAGS_ELF<span style="color:#66d9ef">)</span> -o <span style="color:#66d9ef">$(</span>BINDIR<span style="color:#66d9ef">)</span>/<span style="color:#66d9ef">$(</span>OUTPUT<span style="color:#66d9ef">)</span>.elf <span style="color:#66d9ef">$(</span>OBJECTS<span style="color:#66d9ef">)</span> -lm
+	@echo <span style="color:#e6db74">&#39;Finished building target: $@&#39;</span>
+	@echo <span style="color:#e6db74">&#39; &#39;</span>
+	<span style="color:#66d9ef">$(</span>MAKE<span style="color:#66d9ef">)</span> --no-print-directory post-build
+
+<span style="color:#a6e22e">$(OBJDIR)/%.o</span><span style="color:#f92672">:</span> %.s
+	@echo <span style="color:#e6db74">&#39;Building file: $@&#39;</span>
+	@echo <span style="color:#e6db74">&#39;Invoking: C Compiler&#39;</span>
+	<span style="color:#66d9ef">$(</span>CC<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>CC_FLAGS<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>CC_FLAGS_OBJS<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>CC_PARAMS<span style="color:#66d9ef">)</span> -DDEBUG -O0 -g3 -Wall -fmessage-length<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> -ffunction-sections -c -MMD -MP -MF<span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>@:%.o<span style="color:#f92672">=</span>%.d<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span> -MT<span style="color:#e6db74">&#34;</span>$@<span style="color:#e6db74">&#34;</span> -o $@ $&lt;
+	@echo <span style="color:#e6db74">&#39;Finished building: $@&#39;</span>
+	@echo <span style="color:#e6db74">&#39; &#39;</span>
+
+<span style="color:#a6e22e">$(OBJDIR)/%.o</span><span style="color:#f92672">:</span> %.S
+	@echo <span style="color:#e6db74">&#39;Building file: $@&#39;</span>
+	@echo <span style="color:#e6db74">&#39;Invoking: C Compiler&#39;</span>
+	<span style="color:#66d9ef">$(</span>CC<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>CC_FLAGS<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>CC_FLAGS_OBJS<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>CC_PARAMS<span style="color:#66d9ef">)</span> -DDEBUG -O0 -g3 -Wall -fmessage-length<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> -ffunction-sections -c -MMD -MP -MF<span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>@:%.o<span style="color:#f92672">=</span>%.d<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span> -MT<span style="color:#e6db74">&#34;</span>$@<span style="color:#e6db74">&#34;</span> -o $@ $&lt;
+	@echo <span style="color:#e6db74">&#39;Finished building: $@&#39;</span>
+	@echo <span style="color:#e6db74">&#39; &#39;</span>
+
+<span style="color:#a6e22e">$(OBJDIR)/%.o</span><span style="color:#f92672">:</span> %.c
+	@echo <span style="color:#e6db74">&#39;Building file: $@&#39;</span>
+	@echo <span style="color:#e6db74">&#39;Invoking: C Compiler&#39;</span>
+	<span style="color:#66d9ef">$(</span>CC<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>CC_FLAGS<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>CC_FLAGS_OBJS<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>CC_PARAMS<span style="color:#66d9ef">)</span> -DDEBUG -O0 -g3 -Wall -fmessage-length<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> -ffunction-sections -c -MMD -MP -MF<span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>@:%.o<span style="color:#f92672">=</span>%.d<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span> -MT<span style="color:#e6db74">&#34;</span>$@<span style="color:#e6db74">&#34;</span> -o $@ $&lt;
+	@echo <span style="color:#e6db74">&#39;Finished building: $@&#39;</span>
+	@echo <span style="color:#e6db74">&#39; &#39;</span>
+
+<span style="color:#a6e22e">$(OBJDIRS)</span><span style="color:#f92672">:</span>
+	mkdir -p $@ 
+
+<span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> post-build dir clean
+<span style="color:#a6e22e">post-build</span><span style="color:#f92672">:</span>
+	-@echo <span style="color:#e6db74">&#39;Generating binary and Printing size information:&#39;</span>
+	arm-none-eabi-objcopy -O binary <span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>BINDIR<span style="color:#66d9ef">)</span><span style="color:#e6db74">/</span><span style="color:#66d9ef">$(</span>OUTPUT<span style="color:#66d9ef">)</span><span style="color:#e6db74">.elf&#34;</span> <span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>BINDIR<span style="color:#66d9ef">)</span><span style="color:#e6db74">/</span><span style="color:#66d9ef">$(</span>OUTPUT<span style="color:#66d9ef">)</span><span style="color:#e6db74">.bin&#34;</span>
+	arm-none-eabi-size <span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>BINDIR<span style="color:#66d9ef">)</span><span style="color:#e6db74">/</span><span style="color:#66d9ef">$(</span>OUTPUT<span style="color:#66d9ef">)</span><span style="color:#e6db74">.elf&#34;</span>
+	-@echo <span style="color:#e6db74">&#39; &#39;</span>
+
+<span style="color:#a6e22e">dir</span><span style="color:#f92672">:</span>
+	@echo <span style="color:#e6db74">&#39;Creat output folders&#39;</span>
+	@echo <span style="color:#66d9ef">$(</span>OBJECTS<span style="color:#66d9ef">)</span>
+	<span style="color:#66d9ef">$(</span>MK<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>BINDIR<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>OBJDIR<span style="color:#66d9ef">)</span>
+	@echo <span style="color:#e6db74">&#39; &#39;</span>
+
+<span style="color:#a6e22e">clean</span><span style="color:#f92672">:</span>
+	@echo <span style="color:#e6db74">&#39;Clean output folders&#39;</span>
+	<span style="color:#66d9ef">$(</span>RM<span style="color:#66d9ef">)</span> <span style="color:#66d9ef">$(</span>BINDIR<span style="color:#66d9ef">)</span>/ <span style="color:#66d9ef">$(</span>OBJDIR<span style="color:#66d9ef">)</span>/ <span style="color:#66d9ef">$(</span>RELEASEDIR<span style="color:#66d9ef">)</span>/
+	@echo <span style="color:#e6db74">&#39; &#39;</span>
+</code></pre></div><h2 id="compilation">Compilation</h2>
+<p>On lance la commande <em>make</em> et si tout se passe bien, notre binaire devrait sa générer. On la flash dans la carte et c&rsquo;est fini.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>Ceci était un premier pas dans le monde de FreeRTOS. Nous n&rsquo;avons vu là qu&rsquo;environ 1% du potentiel de ce dernier mais nous le verrons plus en profondeur lors des prochains articles dans lesquels j’intégrerai l&rsquo;OS dans des cas plus concrets.</p>
+<p>N&rsquo;oubliez pas que l&rsquo;ensemble des sources du projet est disponible sur <a href="https://github.com/lchagnoleau/STM32_Template">GitHub</a>.</p>
+
+    </div>
+    
+      
+        <div class="pagination">
+          <div class="pagination__title">
+            <span class="pagination__title-h"
+              >Lire d&#39;autres articles</span
+            >
+            <hr />
+          </div>
+          <div class="pagination__buttons">
+            
+            
+              <span class="button next">
+                <a href="lchagnoleau.github.io/posts/freertos1/">
+                  <span class="button__text">FreeRTOS from scratch sur STM32F446 Partie 1/2</span>
+                  <span class="button__icon">→</span>
+                </a>
+              </span>
+            
+          </div>
+        </div>
+      
+    
+
+    
+      
+        
+
+      
+    
+  </div>
+
+      </div>
+
+      
+        <footer class="footer">
+  <div class="footer__inner">
+    
+      <a
+  href="/"
+  class="logo"
+  style="text-decoration: none;"
+>
+  
+    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367" />
+</svg>
+</span>
+    <span class="logo__text"
+      >Loïc Chagnoleau</span
+    >
+    <span class="logo__cursor"></span>
+  
+</a>
+
+      <div class="copyright">
+        <span
+          >© 2021 Powered by
+          <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a></span
+        >
+        <span
+          >Theme created by
+          <a href="https://twitter.com/panr" target="_blank" rel="noopener">panr</a></span
+        >
+      </div>
+    
+  </div>
+</footer>
+
+<script src="lchagnoleau.github.io/assets/main.js"></script>
+<script src="lchagnoleau.github.io/assets/prism.js"></script>
+
+
+      
+    </div>
+
+    
+  </body>
+</html>

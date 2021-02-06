@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Loïc Chagnoleau</title>
+    
+    
+    
+    <link>lchagnoleau.github.io/post/</link>
+    <description>Recent content in Posts on Loïc Chagnoleau</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>fr-FR</language>
+    <lastBuildDate>Sun, 31 Jan 2021 12:15:00 +0100</lastBuildDate>
+    
+	<atom:link href="lchagnoleau.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>FreeRTOS from scratch sur STM32F446 Partie 2/2</title>
+      <link>lchagnoleau.github.io/posts/freertos2/</link>
+      <pubDate>Sun, 31 Jan 2021 12:15:00 +0100</pubDate>
+      
+      <guid>lchagnoleau.github.io/posts/freertos2/</guid>
+      <description>
+        
+          
+          
+          
+        
+        
+        
+          On s&amp;rsquo;attaque aujourd&amp;rsquo;hui à la deuxième partie de l&amp;rsquo;article à savoir, l&amp;rsquo;intégration dans notre projet d&amp;rsquo;un système d&amp;rsquo;exploitation temps réel : FreeRTOS.
+Qu&amp;rsquo;est ce qu&amp;rsquo;un OS temps réel ? Dans les systèmes embarqués, il y a des cas ou l&amp;rsquo;on est contraint de respecter des temps d’exécutions donnés. Pennons l&amp;rsquo;exemple du système Airbag dans l&amp;rsquo;automobile. Il est primordial lors d&amp;rsquo;un choc frontal que l&amp;rsquo;Airbag se déclenche en x ms. ni plus, ni moins.
+          
+        
+        </description>
+    </item>
+    
+    <item>
+      <title>FreeRTOS from scratch sur STM32F446 Partie 1/2</title>
+      <link>lchagnoleau.github.io/posts/freertos1/</link>
+      <pubDate>Sat, 23 Jan 2021 19:18:00 +0100</pubDate>
+      
+      <guid>lchagnoleau.github.io/posts/freertos1/</guid>
+      <description>
+        
+          
+          
+          
+        
+        
+        
+          Introduction Je vais vous montrer au travers de ces 2 articles comment créer un projet FreeRTOS from scratch et comment le flasher dans une Nucleo. On y verra notamment quels outils/logiciels sont nécessaire, comment démarrer simplement sur Nucleo, utiliser les outils de débogages et pour finir, comment intégrer FreeRTOS à nos projets et à quoi ça sert.
+Dans le premier article, on créera notre projet from scratch. Ce sera dans le second article que nous y intégrerons FreeRTOS.
+          
+        
+        </description>
+    </item>
+    
+    <item>
+      <title>FreeRTOS : configASSERT( xTaskToNotify )</title>
+      <link>lchagnoleau.github.io/posts/configassert/</link>
+      <pubDate>Sun, 17 Jan 2021 10:00:00 +0100</pubDate>
+      
+      <guid>lchagnoleau.github.io/posts/configassert/</guid>
+      <description>
+        
+          
+          
+          
+        
+        
+        
+          FreeRTOS : configASSERT( xTaskToNotify ) En développant mon application utilisant le superbe FreeRTOS, j&amp;rsquo;ai eu la surprise de tomber dans un assert après avoir activé le système de debug SEGGER SystemView. Mais cela peut aussi arriver si les fréquences d&amp;rsquo;horloge du CPU sont trop faible.
+Comprendre le problème Lorsque l&amp;rsquo;on active le SEGGER SystemView avec une fréquence d&amp;rsquo;horloge du CPU trop faible, nous tombons dans un assert.
+Cette assert est déclenchée car une tache est notifiée à partir d&amp;rsquo;une interruption mais cette tâche à un id de 0.
+          
+        
+        </description>
+    </item>
+    
+    <item>
+      <title>Hello Friend</title>
+      <link>lchagnoleau.github.io/post/hello/</link>
+      <pubDate>Wed, 17 Sep 1986 00:00:00 +0000</pubDate>
+      
+      <guid>lchagnoleau.github.io/post/hello/</guid>
+      <description>
+        
+          &lt;img src=&#34;lchagnoleau.github.io/img/hello.jpg&#34;/&gt;
+          
+        
+        
+        
+          &#34;Hello, friend?&#34; That&#39;s lame. Maybe I should give you a name?
+          
+        
+        </description>
+    </item>
+    
+  </channel>
+</rss>

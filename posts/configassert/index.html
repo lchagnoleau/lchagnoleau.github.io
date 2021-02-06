@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    
+      <title>
+        FreeRTOS : configASSERT( xTaskToNotify ) ::
+        Loïc Chagnoleau — From scratch
+      </title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta
+  name="description"
+  content="FreeRTOS : configASSERT( xTaskToNotify ) En développant mon application utilisant le superbe FreeRTOS, j&amp;rsquo;ai eu la surprise de tomber dans un assert après avoir activé le système de debug SEGGER SystemView. Mais cela peut aussi arriver si les fréquences d&amp;rsquo;horloge du CPU sont trop faible.
+Comprendre le problème Lorsque l&amp;rsquo;on active le SEGGER SystemView avec une fréquence d&amp;rsquo;horloge du CPU trop faible, nous tombons dans un assert.
+Cette assert est déclenchée car une tache est notifiée à partir d&amp;rsquo;une interruption mais cette tâche à un id de 0."
+/>
+<meta
+  name="keywords"
+  content=""
+/>
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="lchagnoleau.github.io/posts/configassert/" />
+
+
+
+
+
+<link rel="stylesheet" href="lchagnoleau.github.io/assets/style.css" />
+
+<link rel="stylesheet" href="lchagnoleau.github.io/style.css" />
+
+
+<link
+  rel="apple-touch-icon-precomposed"
+  sizes="144x144"
+  href="lchagnoleau.github.io/img/apple-touch-icon-144-precomposed.png"
+/>
+<link rel="shortcut icon" href="lchagnoleau.github.io/img/favicon.png" />
+
+
+<link href="lchagnoleau.github.io/assets/fonts/Inter-Italic.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="lchagnoleau.github.io/assets/fonts/Inter-Regular.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="lchagnoleau.github.io/assets/fonts/Inter-Medium.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="lchagnoleau.github.io/assets/fonts/Inter-MediumItalic.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="lchagnoleau.github.io/assets/fonts/Inter-Bold.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="lchagnoleau.github.io/assets/fonts/Inter-BoldItalic.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="FreeRTOS : configASSERT( xTaskToNotify )"/>
+<meta name="twitter:description" content="FreeRTOS : configASSERT( xTaskToNotify ) En développant mon application utilisant le superbe FreeRTOS, j&rsquo;ai eu la surprise de tomber dans un assert après avoir activé le système de debug SEGGER SystemView. Mais cela peut aussi arriver si les fréquences d&rsquo;horloge du CPU sont trop faible.
+Comprendre le problème Lorsque l&rsquo;on active le SEGGER SystemView avec une fréquence d&rsquo;horloge du CPU trop faible, nous tombons dans un assert.
+Cette assert est déclenchée car une tache est notifiée à partir d&rsquo;une interruption mais cette tâche à un id de 0."/>
+
+
+
+<meta property="og:title" content="FreeRTOS : configASSERT( xTaskToNotify )" />
+<meta property="og:description" content="FreeRTOS : configASSERT( xTaskToNotify ) En développant mon application utilisant le superbe FreeRTOS, j&rsquo;ai eu la surprise de tomber dans un assert après avoir activé le système de debug SEGGER SystemView. Mais cela peut aussi arriver si les fréquences d&rsquo;horloge du CPU sont trop faible.
+Comprendre le problème Lorsque l&rsquo;on active le SEGGER SystemView avec une fréquence d&rsquo;horloge du CPU trop faible, nous tombons dans un assert.
+Cette assert est déclenchée car une tache est notifiée à partir d&rsquo;une interruption mais cette tâche à un id de 0." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="lchagnoleau.github.io/posts/configassert/" />
+<meta property="article:published_time" content="2021-01-17T10:00:00+01:00" />
+<meta property="article:modified_time" content="2021-01-17T10:00:00+01:00" /><meta property="og:site_name" content="Loïc Chagnoleau" />
+
+
+
+
+
+
+  </head>
+  <body class="dark-theme">
+    <div class="container">
+      <header class="header">
+  <span class="header__inner">
+    <a
+  href="/"
+  class="logo"
+  style="text-decoration: none;"
+>
+  
+    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367" />
+</svg>
+</span>
+    <span class="logo__text"
+      >Loïc Chagnoleau</span
+    >
+    <span class="logo__cursor"></span>
+  
+</a>
+
+    <span class="header__right">
+      
+        <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="lchagnoleau.github.io/about">À propos</a></li>
+        
+      
+      
+      
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="lchagnoleau.github.io/about">À propos</a></li>
+      
+    
+  </ul>
+</nav>
+
+        <span class="menu-trigger">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M0 0h24v24H0z" fill="none" />
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+          </svg>
+        </span>
+      
+      <span class="theme-toggle">
+        <svg
+  class="theme-toggler"
+  width="24"
+  height="24"
+  viewBox="0 0 48 48"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
+  3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
+  13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"
+  />
+</svg>
+
+      </span>
+    </span>
+  </span>
+</header>
+
+
+      <div class="content">
+        
+  
+  
+
+  <div class="post">
+    <h1 class="post-title">FreeRTOS : configASSERT( xTaskToNotify )</h1>
+    <div class="post-meta">
+      
+        <span class="post-date">
+          17-01-2021
+        </span>
+
+        
+          
+        
+      
+
+      
+
+
+      
+    </div>
+
+    
+
+    
+
+    <div class="post-content">
+      
+      <h1 id="freertos--configassert-xtasktonotify-">FreeRTOS : configASSERT( xTaskToNotify )</h1>
+<p>En développant mon application utilisant le superbe FreeRTOS, j&rsquo;ai eu la surprise de tomber dans un <em>assert</em> après avoir activé le système de debug SEGGER SystemView. Mais cela peut aussi arriver si les fréquences d&rsquo;horloge du CPU sont trop faible.</p>
+<h2 id="comprendre-le-problème">Comprendre le problème</h2>
+<p>Lorsque l&rsquo;on active le SEGGER SystemView avec une fréquence d&rsquo;horloge du CPU trop faible, nous tombons dans un <em>assert</em>.<br>
+Cette <em>assert</em> est déclenchée car une tache est notifiée à partir d&rsquo;une interruption mais cette tâche à un id de 0. Ce qui ne devrait pas être le cas.<br>
+Cela se produit très certainement du fait que l&rsquo;interruption en question se déclenche, et donc notifie une tâche, avant même que les tâches ne soient créée et initialisée.</p>
+<p>Lorsque l&rsquo;on active le SystemView, des instructions sont rajoutées à des endroits stratégique du kernel afin d&rsquo;envoyer certaine trace de debug. Notamment, dans la fonction Systick qui s’exécute très régulièrement. De ce fait, la partie du code ou se fait l&rsquo;initialisation des tâches se fait bien plus tard que qu&rsquo;avant. Or, dans notre application, les interruptions sont lancées bien avant l&rsquo;initialisation des tâches.<br>
+Je résume brièvement ce que fait le CPU au début du main <strong>sans SystemView</strong> :</p>
+<ol>
+<li>Initialisation des horloges</li>
+<li>Initialisation des périphériques</li>
+<li>Initialisation des interruptions</li>
+<li>Initialisation des taches</li>
+<li>Une interruption se déclenche et notifie une tâche</li>
+</ol>
+<p>Dans ce cas tout va bien car l&rsquo;interruption se déclenche après l&rsquo;initialisation des tâches. Mais dans le cas ou les horloges CPU sont plus faible et/ou SystemView est activé, notre historique devient comme suit :</p>
+<ol>
+<li>Initialisation des horloges</li>
+<li>Initialisation des périphériques</li>
+<li>Initialisation des interruptions</li>
+<li><strong>Une interruption se déclenche et notifie une tâche</strong></li>
+<li>Initialisation des taches</li>
+</ol>
+<p>En effet, à cause du temps rajouté entre le moment ou les interruptions sont activée et le moment ou les tâche sont initialisée, une interruption s&rsquo;est déjà déclenchée.<br>
+Dans ce cas particulier, une tâche est donc notifiée avant que cette dernière ne soit initialisée ce qui cause le fameux configASSERT( xTaskToNotify ).</p>
+<h2 id="solution">Solution</h2>
+<p>La solution la plus simple et la plus sûre consiste à initialiser les interruptions après les tâches, tout simplement. Ce qui donne le déroulement suivant :</p>
+<ol>
+<li>Initialisation des horloges</li>
+<li>Initialisation des périphériques</li>
+<li>Initialisation des taches</li>
+<li>Initialisation des interruptions</li>
+<li>Une interruption se déclenche et notifie une tâche</li>
+</ol>
+
+    </div>
+    
+      
+        <div class="pagination">
+          <div class="pagination__title">
+            <span class="pagination__title-h"
+              >Lire d&#39;autres articles</span
+            >
+            <hr />
+          </div>
+          <div class="pagination__buttons">
+            
+              <span class="button previous">
+                <a href="lchagnoleau.github.io/posts/freertos1/">
+                  <span class="button__icon">←</span>
+                  <span class="button__text">FreeRTOS from scratch sur STM32F446 Partie 1/2</span>
+                </a>
+              </span>
+            
+            
+              <span class="button next">
+                <a href="lchagnoleau.github.io/post/hello/">
+                  <span class="button__text">Hello Friend</span>
+                  <span class="button__icon">→</span>
+                </a>
+              </span>
+            
+          </div>
+        </div>
+      
+    
+
+    
+      
+        
+
+      
+    
+  </div>
+
+      </div>
+
+      
+        <footer class="footer">
+  <div class="footer__inner">
+    
+      <a
+  href="/"
+  class="logo"
+  style="text-decoration: none;"
+>
+  
+    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367" />
+</svg>
+</span>
+    <span class="logo__text"
+      >Loïc Chagnoleau</span
+    >
+    <span class="logo__cursor"></span>
+  
+</a>
+
+      <div class="copyright">
+        <span
+          >© 2021 Powered by
+          <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a></span
+        >
+        <span
+          >Theme created by
+          <a href="https://twitter.com/panr" target="_blank" rel="noopener">panr</a></span
+        >
+      </div>
+    
+  </div>
+</footer>
+
+<script src="lchagnoleau.github.io/assets/main.js"></script>
+<script src="lchagnoleau.github.io/assets/prism.js"></script>
+
+
+      
+    </div>
+
+    
+  </body>
+</html>
