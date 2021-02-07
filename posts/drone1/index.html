@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    
+      <title>
+        Drone software from scratch 1/x ::
+        Loïc Chagnoleau
+      </title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta
+  name="description"
+  content="Cela fait quelques temps que j&amp;rsquo;ai envie de me lancer ce défi. Je suis fan de drone et je m&amp;rsquo;en suis déjà fabriqué deux. Ils tournent avec Betaflight, un fork de Cleanflight. Il doit s&amp;rsquo;agir je pense des logiciels libre pour drone les plus utilisés. Le projet consiste à de recoder from scratch un logiciel embarqué pour un de mes drone. Je ne ferai jamais aussi bien qu&amp;rsquo;eux mais l&amp;rsquo;idée est plutôt de vous montrer comment on peut réaliser un projet ambitieux depuis zéro."
+/>
+<meta
+  name="keywords"
+  content=""
+/>
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="https://loic-chagnoleau.com/posts/drone1/" />
+
+
+
+
+
+<link rel="stylesheet" href="https://loic-chagnoleau.com/assets/style.css" />
+
+<link rel="stylesheet" href="https://loic-chagnoleau.com/style.css" />
+
+
+<link
+  rel="apple-touch-icon-precomposed"
+  sizes="144x144"
+  href="https://loic-chagnoleau.com/img/apple-touch-icon-144-precomposed.png"
+/>
+<link rel="shortcut icon" href="https://loic-chagnoleau.com/img/favicon.png" />
+
+
+<link href="https://loic-chagnoleau.com/assets/fonts/Inter-Italic.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="https://loic-chagnoleau.com/assets/fonts/Inter-Regular.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="https://loic-chagnoleau.com/assets/fonts/Inter-Medium.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="https://loic-chagnoleau.com/assets/fonts/Inter-MediumItalic.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="https://loic-chagnoleau.com/assets/fonts/Inter-Bold.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="https://loic-chagnoleau.com/assets/fonts/Inter-BoldItalic.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Drone software from scratch 1/x"/>
+<meta name="twitter:description" content="Cela fait quelques temps que j&rsquo;ai envie de me lancer ce défi. Je suis fan de drone et je m&rsquo;en suis déjà fabriqué deux. Ils tournent avec Betaflight, un fork de Cleanflight. Il doit s&rsquo;agir je pense des logiciels libre pour drone les plus utilisés. Le projet consiste à de recoder from scratch un logiciel embarqué pour un de mes drone. Je ne ferai jamais aussi bien qu&rsquo;eux mais l&rsquo;idée est plutôt de vous montrer comment on peut réaliser un projet ambitieux depuis zéro."/>
+
+
+
+<meta property="og:title" content="Drone software from scratch 1/x" />
+<meta property="og:description" content="Cela fait quelques temps que j&rsquo;ai envie de me lancer ce défi. Je suis fan de drone et je m&rsquo;en suis déjà fabriqué deux. Ils tournent avec Betaflight, un fork de Cleanflight. Il doit s&rsquo;agir je pense des logiciels libre pour drone les plus utilisés. Le projet consiste à de recoder from scratch un logiciel embarqué pour un de mes drone. Je ne ferai jamais aussi bien qu&rsquo;eux mais l&rsquo;idée est plutôt de vous montrer comment on peut réaliser un projet ambitieux depuis zéro." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://loic-chagnoleau.com/posts/drone1/" />
+<meta property="article:published_time" content="2021-02-06T19:27:42+01:00" />
+<meta property="article:modified_time" content="2021-02-06T19:27:42+01:00" /><meta property="og:site_name" content="Loïc Chagnoleau" />
+
+
+
+
+
+
+  </head>
+  <body class="dark-theme">
+    <div class="container">
+      <header class="header">
+  <span class="header__inner">
+    <a
+  href="/"
+  class="logo"
+  style="text-decoration: none;"
+>
+  
+    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367" />
+</svg>
+</span>
+    <span class="logo__text"
+      >Loïc Chagnoleau</span
+    >
+    <span class="logo__cursor"></span>
+  
+</a>
+
+    <span class="header__right">
+      
+        <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/about">À propos</a></li>
+        
+      
+      
+      
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/about">À propos</a></li>
+      
+    
+  </ul>
+</nav>
+
+        <span class="menu-trigger">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M0 0h24v24H0z" fill="none" />
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+          </svg>
+        </span>
+      
+      <span class="theme-toggle">
+        <svg
+  class="theme-toggler"
+  width="24"
+  height="24"
+  viewBox="0 0 48 48"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
+  3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
+  13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"
+  />
+</svg>
+
+      </span>
+    </span>
+  </span>
+</header>
+
+
+      <div class="content">
+        
+  
+  
+
+  <div class="post">
+    <h1 class="post-title">Drone software from scratch 1/x</h1>
+    <div class="post-meta">
+      
+        <span class="post-date">
+          06-02-2021
+        </span>
+
+        
+          
+        
+      
+
+      
+
+
+      
+    </div>
+
+    
+
+    
+
+    <div class="post-content">
+      
+      <p>Cela fait quelques temps que j&rsquo;ai envie de me lancer ce défi. Je suis fan de drone et je m&rsquo;en suis déjà fabriqué deux.
+Ils tournent avec <a href="https://github.com/betaflight/betaflight">Betaflight</a>, un fork de <a href="https://github.com/cleanflight/cleanflight">Cleanflight</a>. Il doit s&rsquo;agir je pense des logiciels libre pour drone les plus utilisés.
+Le projet consiste à de recoder from scratch un logiciel embarqué pour un de mes drone. Je ne ferai jamais aussi bien qu&rsquo;eux mais l&rsquo;idée est plutôt de vous montrer comment on peut réaliser un projet ambitieux depuis zéro. En effet, même si cela est possible, je ne compte pas pomper le code de Cleanflight ni de m&rsquo;en inspirer.
+A première vu, le projet semble démesuré. Il y a tellement de chose à faire (drivers accéléromètre, gyroscope, gestion des moteurs, PID&hellip;) que la tâche peut vite sembler insurmontable.
+L&rsquo;idée, pour s&rsquo;en sortir, consiste à découper le projet en différentes tâches. Vous verrez qu&rsquo;après les avoir clairement définies, on y verra beaucoup plus clair et l&rsquo;objectif nous semblera réalisable.
+La première partie de ce projet commence maintenant et l&rsquo;objectif pour aujourd&rsquo;hui est de planifier et lister les tâches à accomplir pour faire voler notre drone.</p>
+<h2 id="cahier-des-charge">Cahier des charge</h2>
+<p>Chaque projet ce doit de commencer par une définition claire et précise des spécifications :</p>
+<ol>
+<li>
+<p>Le drone doit pouvoir voler</p>
+</li>
+<li>
+<p>Le drone doit pouvoir être pilotable par radio-commande</p>
+<p>2.1 Une commande des gaz</p>
+<p>2.2 Une commande pour le roulis</p>
+<p>2.3 Une commande pour le lacet</p>
+<p>2.4 Une commande pour le tangage</p>
+<p>2.5 Une commande pour armer/désarmer les moteurs</p>
+</li>
+<li>
+<p>Le drone doit pouvoir rester stable en vol lorsque aucune commande n&rsquo;est envoyée</p>
+</li>
+<li>
+<p>Lorsque les commandes de tangage et/ou roulis et/ou lacet revienne à zéro, le drone doit se remettre à l&rsquo;horizontale et se stabiliser</p>
+</li>
+<li>
+<p>Le drone ne doit pas dépasser une inclinaison maximale de 30°</p>
+</li>
+</ol>
+<p>Nous n&rsquo;avons pas pour vocation de recoder toutes les fonctionnalités que propose des logiciels comme Cleanflight ou Ardupilot. Ici, pas de GPS, de gestion multi-board, gestion des différents modes de vol, atterrissage automatique ou autre. On va rester simple histoire que le projet ne prenne pas 20 ans.
+Notez que la liste des spécifications peut être amenée à évoluer et c&rsquo;est normal. Tout au long dur projet, on devra challenger cette liste. On va s&rsquo;apercevoir qu&rsquo;une spécification n&rsquo;est pas assez précise et qu&rsquo;il faut la découper, ou bien que deux d&rsquo;entre elles sont incompatible ou encore qu&rsquo;il en manque tout simplement. C&rsquo;est vrai pour la quasi totalité des projets dans l&rsquo;industrie et c&rsquo;est donc ok si le cahier des charges n&rsquo;est pas parfait du premier coup.</p>
+<h2 id="organisation-du-projet">Organisation du projet</h2>
+<p>C&rsquo;est maintenant que nous allons découper notre projet en tâches en fonction des spécifications que nous avons listées.
+Pour être efficace, une tâche doit être réalisable en 1 à 2 jours. Si ça n&rsquo;est pas le cas, c&rsquo;est qu&rsquo;il faut certainement découper cette tâche. Cela permet de savoir ou donner de la tête, de mieux estimer la durée du projet et surtout, ça nous rassure quant à la faisabilité du projet dans sa globalité.
+Voici donc les tâches que j&rsquo;ai retenues :</p>
+<ol>
+<li>
+<p>Comprendre le fonctionnement d&rsquo;un drone</p>
+</li>
+<li>
+<p>Faire un état des lieux du drone dont nous disposons (liste des composants, câblage, documentations)</p>
+</li>
+<li>
+<p>Définir une architecture logicielle</p>
+</li>
+<li>
+<p>Créer l&rsquo;arborescence du projet</p>
+</li>
+<li>
+<p>Créer une structure pour les tests unitaires</p>
+</li>
+<li>
+<p>Developer une CLI (Command Line Interface) pour simplifier les futurs besoins en débogage</p>
+</li>
+<li>
+<p>Developer le driver pour l&rsquo;accéléromètre</p>
+</li>
+<li>
+<p>Developer le driver pour le gyroscope</p>
+</li>
+<li>
+<p>Developer le driver pour le pilotage des moteurs</p>
+</li>
+<li>
+<p>Developer le driver pour le récepteur radio</p>
+</li>
+<li>
+<p>Developer l&rsquo;algorithme de PID (Proportionnel, Intégral, Dérivé)</p>
+</li>
+<li>
+<p>Developer les tâches d&rsquo;acquisitions des données</p>
+</li>
+<li>
+<p>Developer la tâche de la gestion des moteurs en fonctions des données capteurs + radio</p>
+</li>
+</ol>
+<p>J'écrirai un article par tâche (ou par deux tâches en fonction de la complexité). Donc à coup d&rsquo;une tâche par semaine, le projet devrait nous prendre environ 3 mois.</p>
+<p>Vous pourrez suivre l&rsquo;avancé du projet grâce à mon <a href="https://github.com/lchagnoleau">Github</a>. La première phase du projet, à savoir, comprendre le fonctionnement d&rsquo;un drone commencera la semaine prochaine.</p>
+
+    </div>
+    
+      
+        <div class="pagination">
+          <div class="pagination__title">
+            <span class="pagination__title-h"
+              >Lire d&#39;autres articles</span
+            >
+            <hr />
+          </div>
+          <div class="pagination__buttons">
+            
+            
+              <span class="button next">
+                <a href="https://loic-chagnoleau.com/posts/freertos2/">
+                  <span class="button__text">FreeRTOS from scratch sur STM32F446 Partie 2/2</span>
+                  <span class="button__icon">→</span>
+                </a>
+              </span>
+            
+          </div>
+        </div>
+      
+    
+
+    
+      
+        
+
+      
+    
+  </div>
+
+      </div>
+
+      
+        <footer class="footer">
+  <div class="footer__inner">
+    
+      <a
+  href="/"
+  class="logo"
+  style="text-decoration: none;"
+>
+  
+    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367" />
+</svg>
+</span>
+    <span class="logo__text"
+      >Loïc Chagnoleau</span
+    >
+    <span class="logo__cursor"></span>
+  
+</a>
+
+      <div class="copyright">
+        <span
+          >© 2021 Powered by
+          <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a></span
+        >
+        <span
+          >Theme created by
+          <a href="https://twitter.com/panr" target="_blank" rel="noopener">panr</a></span
+        >
+      </div>
+    
+  </div>
+</footer>
+
+<script src="https://loic-chagnoleau.com/assets/main.js"></script>
+<script src="https://loic-chagnoleau.com/assets/prism.js"></script>
+
+
+      
+    </div>
+
+    
+      
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'G-HZFEYNNFLF', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+    
+  </body>
+</html>

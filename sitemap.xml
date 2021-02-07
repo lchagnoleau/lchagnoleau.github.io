@@ -3,17 +3,22 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://loic-chagnoleau.com/posts/freertos2/</loc>
-    <lastmod>2021-01-31T12:15:00+01:00</lastmod>
+    <loc>https://loic-chagnoleau.com/posts/drone1/</loc>
+    <lastmod>2021-02-06T19:27:42+01:00</lastmod>
   </url>
   
   <url>
     <loc>https://loic-chagnoleau.com/</loc>
-    <lastmod>2021-01-31T12:15:00+01:00</lastmod>
+    <lastmod>2021-02-06T19:27:42+01:00</lastmod>
   </url>
   
   <url>
     <loc>https://loic-chagnoleau.com/post/</loc>
+    <lastmod>2021-02-06T19:27:42+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://loic-chagnoleau.com/posts/freertos2/</loc>
     <lastmod>2021-01-31T12:15:00+01:00</lastmod>
   </url>
   
