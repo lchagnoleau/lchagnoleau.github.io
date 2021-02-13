@@ -9,10 +9,32 @@
     <description>Recent content on Loïc Chagnoleau</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>fr-FR</language>
-    <lastBuildDate>Sat, 06 Feb 2021 19:27:42 +0100</lastBuildDate>
+    <lastBuildDate>Sat, 13 Feb 2021 13:53:10 +0100</lastBuildDate>
     
 	<atom:link href="https://loic-chagnoleau.com/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Drone software from scratch 2/x</title>
+      <link>https://loic-chagnoleau.com/posts/drone2/</link>
+      <pubDate>Sat, 13 Feb 2021 13:53:10 +0100</pubDate>
+      
+      <guid>https://loic-chagnoleau.com/posts/drone2/</guid>
+      <description>
+        
+          
+          
+          
+        
+        
+        
+          Comment fonctionne un drone Un drone par définition est un objet volant sans pilote à bord. Il peut être sous différentes forme mais le drone qui nous intéresse est le Quadcopter :
+Nous allons tâcher de comprendre au long de cet article le fonctionnement de ce type de drone et particulièrement comment il fait pour rester stable.
+Composition d&amp;rsquo;un drone Les moteurs et les hélices Pour qu&amp;rsquo;il ne tourne pas sur lui même, le drone dispose de 4 moteurs dont les sens de rotations sont symétriquement opposées comme sur le schéma ci-dessous :
+          
+        
+        </description>
+    </item>
     
     <item>
       <title>Drone software from scratch 1/x</title>
