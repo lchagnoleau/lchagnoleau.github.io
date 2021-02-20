@@ -9,10 +9,33 @@
     <description>Recent content in Posts on Loïc Chagnoleau</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>fr-FR</language>
-    <lastBuildDate>Sat, 13 Feb 2021 13:53:10 +0100</lastBuildDate>
+    <lastBuildDate>Sat, 20 Feb 2021 15:00:00 +0100</lastBuildDate>
     
 	<atom:link href="https://loic-chagnoleau.com/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Drone software from scratch 3/x</title>
+      <link>https://loic-chagnoleau.com/posts/drone3/</link>
+      <pubDate>Sat, 20 Feb 2021 15:00:00 +0100</pubDate>
+      
+      <guid>https://loic-chagnoleau.com/posts/drone3/</guid>
+      <description>
+        
+          
+          
+          
+        
+        
+        
+          L&amp;rsquo;architecture logicielle L&#39;étape d&amp;rsquo;aujourd&amp;rsquo;hui consiste à définir l&amp;rsquo;architecture logicielle du projet. Elle sert de base au futur code que nous allons developer. C&amp;rsquo;est donc un travail important qui aidera grandement lors du development du logiciel embarqué.
+Pour cela, nous allons utiliser deux types de diagrammes :
+ Diagramme de classe Diagramme de séquence  Architecture générale J&amp;rsquo;ai utilisé un diagramme de classe pour créer mon architecture générale :
+Commençons du bas vers le haut :
+          
+        
+        </description>
+    </item>
     
     <item>
       <title>Drone software from scratch 2/x</title>

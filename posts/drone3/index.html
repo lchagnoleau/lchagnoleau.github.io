@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    
+      <title>
+        Drone software from scratch 3/x ::
+        Loïc Chagnoleau
+      </title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta
+  name="description"
+  content="L&amp;rsquo;architecture logicielle L&#39;étape d&amp;rsquo;aujourd&amp;rsquo;hui consiste à définir l&amp;rsquo;architecture logicielle du projet. Elle sert de base au futur code que nous allons developer. C&amp;rsquo;est donc un travail important qui aidera grandement lors du development du logiciel embarqué.
+Pour cela, nous allons utiliser deux types de diagrammes :
+ Diagramme de classe Diagramme de séquence  Architecture générale J&amp;rsquo;ai utilisé un diagramme de classe pour créer mon architecture générale :
+Commençons du bas vers le haut :"
+/>
+<meta
+  name="keywords"
+  content=""
+/>
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="https://loic-chagnoleau.com/posts/drone3/" />
+
+
+
+
+
+<link rel="stylesheet" href="https://loic-chagnoleau.com/assets/style.css" />
+
+<link rel="stylesheet" href="https://loic-chagnoleau.com/style.css" />
+
+
+<link
+  rel="apple-touch-icon-precomposed"
+  sizes="144x144"
+  href="https://loic-chagnoleau.com/img/apple-touch-icon-144-precomposed.png"
+/>
+<link rel="shortcut icon" href="https://loic-chagnoleau.com/img/favicon.png" />
+
+
+<link href="https://loic-chagnoleau.com/assets/fonts/Inter-Italic.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="https://loic-chagnoleau.com/assets/fonts/Inter-Regular.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="https://loic-chagnoleau.com/assets/fonts/Inter-Medium.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="https://loic-chagnoleau.com/assets/fonts/Inter-MediumItalic.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="https://loic-chagnoleau.com/assets/fonts/Inter-Bold.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+<link href="https://loic-chagnoleau.com/assets/fonts/Inter-BoldItalic.woff2" rel="preload" type="font/woff2" as="font" crossorigin="">
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Drone software from scratch 3/x"/>
+<meta name="twitter:description" content="L&rsquo;architecture logicielle L&#39;étape d&rsquo;aujourd&rsquo;hui consiste à définir l&rsquo;architecture logicielle du projet. Elle sert de base au futur code que nous allons developer. C&rsquo;est donc un travail important qui aidera grandement lors du development du logiciel embarqué.
+Pour cela, nous allons utiliser deux types de diagrammes :
+ Diagramme de classe Diagramme de séquence  Architecture générale J&rsquo;ai utilisé un diagramme de classe pour créer mon architecture générale :
+Commençons du bas vers le haut :"/>
+
+
+
+<meta property="og:title" content="Drone software from scratch 3/x" />
+<meta property="og:description" content="L&rsquo;architecture logicielle L&#39;étape d&rsquo;aujourd&rsquo;hui consiste à définir l&rsquo;architecture logicielle du projet. Elle sert de base au futur code que nous allons developer. C&rsquo;est donc un travail important qui aidera grandement lors du development du logiciel embarqué.
+Pour cela, nous allons utiliser deux types de diagrammes :
+ Diagramme de classe Diagramme de séquence  Architecture générale J&rsquo;ai utilisé un diagramme de classe pour créer mon architecture générale :
+Commençons du bas vers le haut :" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://loic-chagnoleau.com/posts/drone3/" />
+<meta property="article:published_time" content="2021-02-20T15:00:00+01:00" />
+<meta property="article:modified_time" content="2021-02-20T15:00:00+01:00" /><meta property="og:site_name" content="Loïc Chagnoleau" />
+
+
+
+
+
+
+  </head>
+  <body class="dark-theme">
+    <div class="container">
+      <header class="header">
+  <span class="header__inner">
+    <a
+  href="/"
+  class="logo"
+  style="text-decoration: none;"
+>
+  
+    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367" />
+</svg>
+</span>
+    <span class="logo__text"
+      >Loïc Chagnoleau</span
+    >
+    <span class="logo__cursor"></span>
+  
+</a>
+
+    <span class="header__right">
+      
+        <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/about">À propos</a></li>
+        
+      
+      
+      
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/about">À propos</a></li>
+      
+    
+  </ul>
+</nav>
+
+        <span class="menu-trigger">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M0 0h24v24H0z" fill="none" />
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+          </svg>
+        </span>
+      
+      <span class="theme-toggle">
+        <svg
+  class="theme-toggler"
+  width="24"
+  height="24"
+  viewBox="0 0 48 48"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
+  3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
+  13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"
+  />
+</svg>
+
+      </span>
+    </span>
+  </span>
+</header>
+
+
+      <div class="content">
+        
+  
+  
+
+  <div class="post">
+    <h1 class="post-title">Drone software from scratch 3/x</h1>
+    <div class="post-meta">
+      
+        <span class="post-date">
+          20-02-2021
+        </span>
+
+        
+          
+        
+      
+
+      
+
+
+      
+    </div>
+
+    
+
+    
+
+    <div class="post-content">
+      
+      <h2 id="larchitecture-logicielle">L&rsquo;architecture logicielle</h2>
+<p>L'étape d&rsquo;aujourd&rsquo;hui consiste à définir l&rsquo;architecture logicielle du projet. Elle sert de base au futur code que nous allons developer.
+C&rsquo;est donc un travail important qui aidera grandement lors du development du logiciel embarqué.</p>
+<p>Pour cela, nous allons utiliser deux types de diagrammes :</p>
+<ul>
+<li><a href="https://fr.wikipedia.org/wiki/Diagramme_de_classes">Diagramme de classe</a></li>
+<li><a href="https://fr.wikipedia.org/wiki/Diagramme_de_s%C3%A9quence">Diagramme de séquence</a></li>
+</ul>
+<h2 id="architecture-générale">Architecture générale</h2>
+<p>J&rsquo;ai utilisé un diagramme de classe pour créer mon architecture générale :</p>
+
+  <img src="/drone3/software_architecture.png"  alt="Architecture générale"  class="center"  style="border-radius: 8px;"  />
+
+
+<p>Commençons du bas vers le haut :</p>
+<ol>
+<li>En rose nous retrouvons nos différents périphériques physiques</li>
+<li>J&rsquo;y ai annoté en jaune les connexions aux micro-contrôleur.</li>
+<li>En vert nous avons les classes drivers qui permettent de contrôler nos périphériques. Avec en vert clair, chaque fonctions qu&rsquo;il faudra developer.</li>
+<li>En bleu foncé, ce sont les tâches avec en jaune leur niveau de priorité (plus le chiffre est grand, plus elle est prioritaire)</li>
+<li>Enfin, en bleu clair, nous avons les Queues utilisée permettant de d&rsquo;envoyer des données entre les tâches.</li>
+</ol>
+<p>Notez que, tout comme les prochains diagrammes que nous verrons, il existe bien entendu une multitude de façon d&rsquo;architecturer un logiciel et j&rsquo;en ai d&rsquo;ailleurs fait plusieurs autres avant de m&rsquo;arrêter sur celle-ci.
+Normalement, on sait que l&rsquo;architecture que l&rsquo;on vient de créer est correcte lorsque elle est simple à comprendre.</p>
+<h2 id="diagrammes-de-séquences">Diagrammes de séquences</h2>
+<p>Les diagrammes de séquence permettent de schématiser les appels de fonctions entre les différents modules du logicielle.</p>
+<h3 id="tâche-sensors">Tâche &lsquo;Sensors&rsquo;</h3>
+
+  <img src="/drone3/msc_sensors_task.png"  alt="MSC Sensors"  class="center"  style="border-radius: 8px;"  />
+
+
+<ol>
+<li>On initialise la classe <strong>icm20602</strong></li>
+<li>On entre dans une boucle infinie</li>
+<li>On récupère les mesures de l&rsquo;accéléromètre et du gyroscope</li>
+<li>On envoi ces mesures dans la Queue &lsquo;xQueueSensors&rsquo;</li>
+<li>On attends x nano-secondes</li>
+<li>On repart à l'étape 3</li>
+</ol>
+<h3 id="tâche-receiver">Tâche &lsquo;Receiver&rsquo;</h3>
+
+  <img src="/drone3/msc_receiver_task.png"  alt="MSC Receiver"  class="center"  style="border-radius: 8px;"  />
+
+
+<ol>
+<li>On initialise la classe <strong>x4r</strong></li>
+<li>On entre dans une boucle infinie</li>
+<li>On attend une interruption (qui viendra de l&rsquo;UART)</li>
+<li>On parse les données reçues par le périphérique</li>
+<li>On envoi ces données dans la Queue &lsquo;xQueueReceiver&rsquo;</li>
+<li>On repart à l'étape 3</li>
+</ol>
+<h3 id="tâche-pid">Tâche &lsquo;PID&rsquo;</h3>
+
+  <img src="/drone3/msc_pid_task.png"  alt="MSC PID"  class="center"  style="border-radius: 8px;"  />
+
+
+<ol>
+<li>On initialise la classe <strong>rs20a</strong></li>
+<li>On entre dans une boucle infini</li>
+<li>On attend que la Queue &lsquo;xQueueSensors&rsquo; ne soit plus vide</li>
+<li>On récupère les données de la Queue &lsquo;xQueueSensors&rsquo;</li>
+<li>On récupère si disponible les données de la Queue &lsquo;xQueueReceiver&rsquo;</li>
+<li>On récupère les consignes actuelles des moteurs</li>
+<li>On effectue le calcul pour les prochaines consignes moteurs en fonctions de tout ces éléments</li>
+<li>On envoie ces nouvelles consignes aux moteurs</li>
+<li>On repart à l'étape 3</li>
+</ol>
+<h2 id="conclusion-sur-larchitecture-logicielle">Conclusion sur l&rsquo;architecture logicielle</h2>
+<p>L&rsquo;architecture logicielle est un vrai métier qui peut nécessiter plusieurs jours/mois en fonction de la complexité du projet. Cependant, c&rsquo;est une étape crucial qui permet de gagner un temps considerable lors du développement.</p>
+<p>En effet, cela donne une vision global du fonctionnement du logiciel et de ce fait, de nombreux bugs potentiels peuvent être identifiés avant même d&rsquo;avoir écrit la première ligne de code.</p>
+<p>Enfin, cette architecture va définir l&rsquo;arborescence de notre projet et guider le développement.</p>
+
+    </div>
+    
+      
+        <div class="pagination">
+          <div class="pagination__title">
+            <span class="pagination__title-h"
+              >Lire d&#39;autres articles</span
+            >
+            <hr />
+          </div>
+          <div class="pagination__buttons">
+            
+            
+              <span class="button next">
+                <a href="https://loic-chagnoleau.com/posts/drone2/">
+                  <span class="button__text">Drone software from scratch 2/x</span>
+                  <span class="button__icon">→</span>
+                </a>
+              </span>
+            
+          </div>
+        </div>
+      
+    
+
+    
+      
+        
+
+      
+    
+  </div>
+
+      </div>
+
+      
+        <footer class="footer">
+  <div class="footer__inner">
+    
+      <a
+  href="/"
+  class="logo"
+  style="text-decoration: none;"
+>
+  
+    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367" />
+</svg>
+</span>
+    <span class="logo__text"
+      >Loïc Chagnoleau</span
+    >
+    <span class="logo__cursor"></span>
+  
+</a>
+
+      <div class="copyright">
+        <span
+          >© 2021 Powered by
+          <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a></span
+        >
+        <span
+          >Theme created by
+          <a href="https://twitter.com/panr" target="_blank" rel="noopener">panr</a></span
+        >
+      </div>
+    
+  </div>
+</footer>
+
+<script src="https://loic-chagnoleau.com/assets/main.js"></script>
+<script src="https://loic-chagnoleau.com/assets/prism.js"></script>
+
+
+      
+    </div>
+
+    
+      
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-189069171-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+    
+  </body>
+</html>

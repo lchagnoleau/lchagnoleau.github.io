@@ -153,11 +153,11 @@
   <div class="posts">
     
     <div class="post on-list">
-      <h1 class="post-title"><a href="https://loic-chagnoleau.com/posts/drone3/">Drone software from scratch 3/x</a></h1>
+      <h1 class="post-title"><a href="https://loic-chagnoleau.com/posts/configassert/">FreeRTOS : configASSERT( xTaskToNotify )</a></h1>
       <div class="post-meta">
         
           <span class="post-date">
-            20-02-2021
+            17-01-2021
           </span>
 
           
@@ -175,160 +175,27 @@
       <div class="post-content">
         
           
-            L&rsquo;architecture logicielle L'étape d&rsquo;aujourd&rsquo;hui consiste à définir l&rsquo;architecture logicielle du projet. Elle sert de base au futur code que nous allons developer. C&rsquo;est donc un travail important qui aidera grandement lors du development du logiciel embarqué.
-Pour cela, nous allons utiliser deux types de diagrammes :
- Diagramme de classe Diagramme de séquence  Architecture générale J&rsquo;ai utilisé un diagramme de classe pour créer mon architecture générale :
-Commençons du bas vers le haut :
+            FreeRTOS : configASSERT( xTaskToNotify ) En développant mon application utilisant le superbe FreeRTOS, j&rsquo;ai eu la surprise de tomber dans un assert après avoir activé le système de debug SEGGER SystemView. Mais cela peut aussi arriver si les fréquences d&rsquo;horloge du CPU sont trop faible.
+Comprendre le problème Lorsque l&rsquo;on active le SEGGER SystemView avec une fréquence d&rsquo;horloge du CPU trop faible, nous tombons dans un assert.
+Cette assert est déclenchée car une tache est notifiée à partir d&rsquo;une interruption mais cette tâche à un id de 0.
           
         
       </div>
       
-        <div><a class="read-more button" href="/posts/drone3/">Lire plus →</a></div>
-      
-    </div>
-    
-    <div class="post on-list">
-      <h1 class="post-title"><a href="https://loic-chagnoleau.com/posts/drone2/">Drone software from scratch 2/x</a></h1>
-      <div class="post-meta">
-        
-          <span class="post-date">
-            13-02-2021
-          </span>
-
-          
-        
-
-        
-
-        
-      </div>
-
-      
-
-      
-
-      <div class="post-content">
-        
-          
-            Comment fonctionne un drone Un drone par définition est un objet volant sans pilote à bord. Il peut être sous différentes forme mais le drone qui nous intéresse est le Quadcopter :
-Nous allons tâcher de comprendre au long de cet article le fonctionnement de ce type de drone et particulièrement comment il fait pour rester stable.
-Composition d&rsquo;un drone Les moteurs et les hélices Pour qu&rsquo;il ne tourne pas sur lui même, le drone dispose de 4 moteurs dont les sens de rotations sont symétriquement opposées comme sur le schéma ci-dessous :
-          
-        
-      </div>
-      
-        <div><a class="read-more button" href="/posts/drone2/">Lire plus →</a></div>
-      
-    </div>
-    
-    <div class="post on-list">
-      <h1 class="post-title"><a href="https://loic-chagnoleau.com/posts/drone1/">Drone software from scratch 1/x</a></h1>
-      <div class="post-meta">
-        
-          <span class="post-date">
-            06-02-2021
-          </span>
-
-          
-        
-
-        
-
-        
-      </div>
-
-      
-
-      
-
-      <div class="post-content">
-        
-          
-            Cela fait quelques temps que j&rsquo;ai envie de me lancer ce défi. Je suis fan de drone et je m&rsquo;en suis déjà fabriqué deux. Ils tournent avec Betaflight, un fork de Cleanflight. Il doit s&rsquo;agir je pense des logiciels libre pour drone les plus utilisés. Le projet consiste à de recoder from scratch un logiciel embarqué pour un de mes drone. Je ne ferai jamais aussi bien qu&rsquo;eux mais l&rsquo;idée est plutôt de vous montrer comment on peut réaliser un projet ambitieux depuis zéro.
-          
-        
-      </div>
-      
-        <div><a class="read-more button" href="/posts/drone1/">Lire plus →</a></div>
-      
-    </div>
-    
-    <div class="post on-list">
-      <h1 class="post-title"><a href="https://loic-chagnoleau.com/posts/freertos2/">FreeRTOS from scratch sur STM32F446 Partie 2/2</a></h1>
-      <div class="post-meta">
-        
-          <span class="post-date">
-            31-01-2021
-          </span>
-
-          
-        
-
-        
-
-        
-      </div>
-
-      
-
-      
-
-      <div class="post-content">
-        
-          
-            On s&rsquo;attaque aujourd&rsquo;hui à la deuxième partie de l&rsquo;article à savoir, l&rsquo;intégration dans notre projet d&rsquo;un système d&rsquo;exploitation temps réel : FreeRTOS.
-Qu&rsquo;est ce qu&rsquo;un OS temps réel ? Dans les systèmes embarqués, il y a des cas ou l&rsquo;on est contraint de respecter des temps d’exécutions donnés. Pennons l&rsquo;exemple du système Airbag dans l&rsquo;automobile. Il est primordial lors d&rsquo;un choc frontal que l&rsquo;Airbag se déclenche en x ms. ni plus, ni moins.
-          
-        
-      </div>
-      
-        <div><a class="read-more button" href="/posts/freertos2/">Lire plus →</a></div>
-      
-    </div>
-    
-    <div class="post on-list">
-      <h1 class="post-title"><a href="https://loic-chagnoleau.com/posts/freertos1/">FreeRTOS from scratch sur STM32F446 Partie 1/2</a></h1>
-      <div class="post-meta">
-        
-          <span class="post-date">
-            23-01-2021
-          </span>
-
-          
-        
-
-        
-
-        
-      </div>
-
-      
-
-      
-
-      <div class="post-content">
-        
-          
-            Introduction Je vais vous montrer au travers de ces 2 articles comment créer un projet FreeRTOS from scratch et comment le flasher dans une Nucleo. On y verra notamment quels outils/logiciels sont nécessaire, comment démarrer simplement sur Nucleo, utiliser les outils de débogages et pour finir, comment intégrer FreeRTOS à nos projets et à quoi ça sert.
-Dans le premier article, on créera notre projet from scratch. Ce sera dans le second article que nous y intégrerons FreeRTOS.
-          
-        
-      </div>
-      
-        <div><a class="read-more button" href="/posts/freertos1/">Lire plus →</a></div>
+        <div><a class="read-more button" href="/posts/configassert/">Lire plus →</a></div>
       
     </div>
     
     <div class="pagination">
   <div class="pagination__buttons">
     
-    
-      <span class="button next">
-        <a href="/page/2/">
-          <span class="button__text">Anciens arcticles</span>
-          <span class="button__icon">→</span>
+      <span class="button previous">
+        <a href="/">
+          <span class="button__icon">←</span>
+          <span class="button__text">Nouveaux arcticles</span>
         </a>
       </span>
+    
     
   </div>
 </div>
