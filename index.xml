@@ -9,10 +9,33 @@
     <description>Recent content on Loïc Chagnoleau</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>fr-FR</language>
-    <lastBuildDate>Sat, 20 Feb 2021 15:00:00 +0100</lastBuildDate>
+    <lastBuildDate>Sat, 06 Mar 2021 12:00:00 +0100</lastBuildDate>
     
 	<atom:link href="https://loic-chagnoleau.com/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Drone software from scratch 4/x</title>
+      <link>https://loic-chagnoleau.com/posts/drone4/</link>
+      <pubDate>Sat, 06 Mar 2021 12:00:00 +0100</pubDate>
+      
+      <guid>https://loic-chagnoleau.com/posts/drone4/</guid>
+      <description>
+        
+          
+          
+          
+        
+        
+        
+          Aujourd&amp;rsquo;hui nous allons créer l&amp;rsquo;arborescence du projet. Je vous invite à aller voir mes deux articles qui explique comment créer un tel projet from scratch:
+ FreeRTOS from scratch sur STM32F446 Partie 1/2 FreeRTOS from scratch sur STM32F446 Partie 2/2  Je passerai donc rapidement sur cette partie.
+Installation des outils On va commencer par installer les outils dont nous auront besoin pour compiler et flasher le binaire :
+sudo apt install dfu-util sudo apt install cmake sudo apt install binutils-arm-none-eabi gcc-arm-none-eabi  arm-none-eabi sont les outils de cross-compilation pour architecture ARM cmake permet de simplifier la compilation dfu-utils permet de flasher le binaire dans la flash en utilisant le mode DFU  Test avant de commencer Avant de commencer, il est bon de tester que les outils fonctionnent.
+          
+        
+        </description>
+    </item>
     
     <item>
       <title>Drone software from scratch 3/x</title>
